@@ -27,7 +27,7 @@ def index(request):
 
 urlpatterns = [
     path('',index),
-    # path('generate/',include('generateAds.urls')),
+    path('generate/',include('generateAds.urls')),
     path('admin/', admin.site.urls),
 ]
 
