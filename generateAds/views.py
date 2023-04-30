@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import ad_create
+from advertools import ad_create, kw_generate
 from .forms import GenerateKeywords
 
 
@@ -36,7 +36,21 @@ def generate(request, products=['jack'],max_length=100,fallback='Great Cities'):
 
 
 def generateKeywords(request):
-    form = GenerateKeywords()
-    return render(request,'generateAds/keywords.html',{'form': form})
+    if request.method == 'POST':
+        form = GenerateKeywords(request.POST)
+        if form.is_valid():
+            
+            product = form.cleaned_data['product']
+            word = form.cleaned_data['word']
+            products = list(map(str.strip,product.split(",")))
+            words = list(map(str.strip,word.split(",")))
+
+            keywordDf = kw_generate(products,words)
+
+            return render(request,'generateAds/keywords.html',{'form': form,'keywordDf': keywordDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = GenerateKeywords()
+        return render(request,'generateAds/keywords.html',{'form': form})
 
 

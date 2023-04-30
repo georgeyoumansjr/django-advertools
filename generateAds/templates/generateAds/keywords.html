@@ -18,6 +18,11 @@
                     {% crispy form %}
                 </form>
             </div>
+            <div class="col-md-8" style="height: 80%; overflow-y: scroll;">
+                {% if keywordDf %}
+                    {{ keywordDf | safe }}
+                {% endif %}
+            </div>
 
         </div>
     </div>
@@ -25,5 +30,8 @@
 {% endblock pageContent %}
 
 {% block javascript %}
+
+
+
 
 {% endblock javascript %}
