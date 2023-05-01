@@ -4,12 +4,35 @@ from django.shortcuts import render
 
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import ad_create, kw_generate
-from .forms import GenerateKeywords
+from advertools import ad_create, kw_generate, ad_from_string
+from .forms import GenerateKeywords, LargeScaleAds
+
+import pandas as pd
 
 
-def generateAds(request):
-    return render(request, "generateAds/advertisement.html",)
+def generateLarge(request):
+    if request.method == 'POST':
+        form = LargeScaleAds(request.POST)
+        if form.is_valid():
+            
+            description_text = form.cleaned_data['description_text']
+            slots = form.cleaned_data['slots']
+            print(slots)
+            if slots:
+                slots = list(map(str.strip,slots.split(",")))
+                slots = list(map(float,slots))
+                generateLargeAds = ad_from_string(description_text, slots=slots)
+            else:
+                slots = None
+                generateLargeAds = generateLargeAds = ad_from_string(description_text)
+
+            df = pd.DataFrame(generateLargeAds,dtype = int)
+
+            return render(request,'generateAds/advertisement.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = LargeScaleAds()
+        return render(request,'generateAds/advertisement.html',{'form': form})
 
 
 def generate(request, products=['jack'],max_length=100,fallback='Great Cities'):

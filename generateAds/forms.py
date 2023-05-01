@@ -3,7 +3,20 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 class LargeScaleAds(forms.Form):
-    pass
+    description_text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
+    "cols": 30,
+    "placeholder": "Add the descriptive text to generate Ads from"
+    }
+    ))
+
+    slots = forms.CharField(widget=forms.TextInput(attrs={
+    "placeholder": "Add slots like 46,78,98"
+    }
+    ))
+    def __init__(self, *args, **kwargs):
+        super(LargeScaleAds, self).__init__(*args, **kwargs)
+        self.fields['slots'].required = False
+
 
 
 class GenerateKeywords(forms.Form):
