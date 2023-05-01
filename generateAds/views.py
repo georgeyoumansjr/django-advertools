@@ -17,7 +17,7 @@ def generateLarge(request):
             
             description_text = form.cleaned_data['description_text']
             slots = form.cleaned_data['slots']
-            print(slots)
+            # print(slots)
             if slots:
                 slots = list(map(str.strip,slots.split(",")))
                 slots = list(map(float,slots))
@@ -26,7 +26,9 @@ def generateLarge(request):
                 slots = None
                 generateLargeAds = generateLargeAds = ad_from_string(description_text)
 
-            df = pd.DataFrame(generateLargeAds,dtype = int)
+            df = pd.DataFrame({
+                'large_ads': generateLargeAds
+            })
 
             return render(request,'generateAds/advertisement.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
