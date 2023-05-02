@@ -2,7 +2,9 @@ from django.urls import path,include
 from . import views
 
 urlpatterns = [
-    path("advertisement/",views.generateLarge, name='advertisement'),
-    path("keywords/",views.generateKeywords, name='keywords')
+    path('advertisement/large/',views.generateLarge,name='largeAds'),
+    path("advertisement/",views.generateDescription, name='advertisement'),
+    path("keywords/",views.generateKeywords, name='keywords'),
+
 
 ]

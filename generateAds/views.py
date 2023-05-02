@@ -1,18 +1,18 @@
 from django.shortcuts import render
 
 # Create your views here.
-
+from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import ad_create, kw_generate, ad_from_string
-from .forms import GenerateKeywords, LargeScaleAds
+from .forms import GenerateKeywords, DescriptionAds, LargeScaleAds
 
 import pandas as pd
 
 
-def generateLarge(request):
+def generateDescription(request):
     if request.method == 'POST':
-        form = LargeScaleAds(request.POST)
+        form = DescriptionAds(request.POST)
         if form.is_valid():
             
             description_text = form.cleaned_data['description_text']
@@ -33,7 +33,7 @@ def generateLarge(request):
             return render(request,'generateAds/advertisement.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
-        form = LargeScaleAds()
+        form = DescriptionAds()
         return render(request,'generateAds/advertisement.html',{'form': form})
 
 
@@ -42,26 +42,38 @@ def generateLarge(request):
         form = LargeScaleAds(request.POST)
         if form.is_valid():
             
-            description_text = form.cleaned_data['description_text']
-            slots = form.cleaned_data['slots']
-            # print(slots)
-            if slots:
-                slots = list(map(str.strip,slots.split(",")))
-                slots = list(map(float,slots))
-                generateLargeAds = ad_from_string(description_text, slots=slots,capitalize=True)
-            else:
-                slots = None
-                generateLargeAds = generateLargeAds = ad_from_string(description_text,capitalize=True)
+            template = form.cleaned_data['template']
+            capitalize = form.cleaned_data['capitalize']
+            replacements = form.cleaned_data['replacements']
+            replacements = list(map(str.strip,replacements.split(",")))
+            max_len = form.cleaned_data['max_len']
+            
+            fallback = form.cleaned_data['fallback']
 
+            if max_len:
+                try:
+                    generateLargeAds = ad_create(template=template,
+                                                replacements=replacements,
+                                                capitalize=capitalize,
+                                                fallback=fallback, max_len=max_len)
+                except ValueError:
+                    messages.error(request,'The template + fallback should be <= '+str(max_len)+' if available')
+                    return redirect('largeAds')
+            else:
+                generateLargeAds = ad_create(template=template,
+                                            replacements=replacements,
+                                            capitalize=capitalize,
+                                            fallback=fallback)
+            
             df = pd.DataFrame({
                 'large_ads': generateLargeAds
             })
 
-            return render(request,'generateAds/advertisement.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+            return render(request,'generateAds/largeAds.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
         form = LargeScaleAds()
-        return render(request,'generateAds/advertisement.html',{'form': form})
+        return render(request,'generateAds/largeAds.html',{'form': form})
 
 
 def generate(request, products=['jack'],max_length=100,fallback='Great Cities'):
