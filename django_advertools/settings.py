@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'django_filters',
     'generateAds.apps.GenerateadsConfig',
+    'analyse.apps.AnalyseConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

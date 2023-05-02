@@ -37,6 +37,33 @@ def generateLarge(request):
         return render(request,'generateAds/advertisement.html',{'form': form})
 
 
+def generateLarge(request):
+    if request.method == 'POST':
+        form = LargeScaleAds(request.POST)
+        if form.is_valid():
+            
+            description_text = form.cleaned_data['description_text']
+            slots = form.cleaned_data['slots']
+            # print(slots)
+            if slots:
+                slots = list(map(str.strip,slots.split(",")))
+                slots = list(map(float,slots))
+                generateLargeAds = ad_from_string(description_text, slots=slots,capitalize=True)
+            else:
+                slots = None
+                generateLargeAds = generateLargeAds = ad_from_string(description_text,capitalize=True)
+
+            df = pd.DataFrame({
+                'large_ads': generateLargeAds
+            })
+
+            return render(request,'generateAds/advertisement.html',{'form': form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = LargeScaleAds()
+        return render(request,'generateAds/advertisement.html',{'form': form})
+
+
 def generate(request, products=['jack'],max_length=100,fallback='Great Cities'):
     if request.is_ajax() and request.method == "POST":
         template = json.loads(request.POST.get('template'))
