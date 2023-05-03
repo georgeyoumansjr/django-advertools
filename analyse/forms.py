@@ -16,3 +16,10 @@ class EmojiSearch(forms.Form):
     }
     ))
 
+class EmojiExtract(forms.Form):
+    emoji_text = forms.CharField(widget=forms.Textarea(attrs={"rows": 10, 
+    "cols": 40,
+    "placeholder":'Enter text you want to extract emoji from in new lines like\nI am grinning 😀\nA grinning cat 😺\nhello! 😀😀😀 💛💛\nJust text'
+    }
+    ))
+

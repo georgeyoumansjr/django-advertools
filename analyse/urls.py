@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path("urls/",views.analyseUrl, name='anUrl'),
     path("emoji/search/",views.searchEmoji, name='searchEmoji'),
+    path("emoji/extract/",views.extractEmoji, name='extractEmoji'),
 ]
