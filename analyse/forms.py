@@ -8,3 +8,11 @@ class AnalyseUrls(forms.Form):
     ))
 
     decode = forms.BooleanField(required=False)
+
+
+class EmojiSearch(forms.Form):
+    emoji_text = forms.CharField(widget=forms.TextInput(attrs={
+    "placeholder":'Enter Emoji you want to view like "vegetable" '
+    }
+    ))
+
