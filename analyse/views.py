@@ -3,8 +3,8 @@ from django.shortcuts import render
 # Create your views here.
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
-from django.http import HttpResponseRedirect, JsonResponse, 
-from advertools import url_to_df, emoji_search, extract_emoji
+from django.http import HttpResponseRedirect, JsonResponse
+from advertools import url_to_df, emoji_search, extract_emoji, stopwords
 from .forms import AnalyseUrls, EmojiSearch, EmojiExtract
 import pandas as pd
 
@@ -64,12 +64,16 @@ def extractEmoji(request):
         return render(request,'analyse/emojiExtract.html',{'form': form})
 
 
-def getStopWords(request,language=None):
+def getStopWords(request):
     if request.method == 'GET':
-        if language:
-            pass
-        else:
-            return render(request,'analyse/stopwords.html')
+        stopwords_list = stopwords
+        df = pd.DataFrame.from_dict(stopwords_list,orient='index')
+        df = df.transpose()
+        return render(request,'analyse/stopwords.html',{'df':df.to_html(classes='table table-striped text-center', justify='center')})
     else:
         return HttpResponse('Ínvalid request Type')
+
+
+
+
 
