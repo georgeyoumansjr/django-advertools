@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import url_to_df, emoji_search, extract_emoji, stopwords
-from .forms import AnalyseUrls, EmojiSearch, EmojiExtract
+from advertools import url_to_df, emoji_search, extract_emoji, stopwords,word_frequency
+from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis
 import pandas as pd
 
 
@@ -73,6 +73,27 @@ def getStopWords(request):
     else:
         return HttpResponse('Ínvalid request Type')
 
+
+def analyzeText(request):
+    if request.method == 'POST':
+        form = TextAnalysis(request.POST)
+        if form.is_valid():
+            
+            valid_text = form.cleaned_data['valid_text']
+            valid_text = list(map(str.strip,valid_text.split("\n")))
+            phrase_len = form.cleaned_data['phrase_len']
+            if phrase_len:
+                df = word_frequency(valid_text,phrase_len=phrase_len)
+            else:
+                df = word_frequency(valid_text)
+            # print(df)
+            # df = pd.DataFrame.from_dict(df,orient='index')
+            # df = df.transpose()
+            return render(request,'analyse/textan.html',{'form': form,'textDf': df.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = TextAnalysis()
+        return render(request,'analyse/textan.html',{'form': form})
 
 
 

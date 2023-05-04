@@ -23,3 +23,15 @@ class EmojiExtract(forms.Form):
     }
     ))
 
+
+class TextAnalysis(forms.Form):
+    valid_text = forms.CharField(widget=forms.Textarea(attrs={"rows": 7, 
+    "cols": 40,
+    "placeholder":'Enter text you want to analyze if seperately seperate it in new lines like\nI am grinning 😀\nA grinning cat 😺\nhello! 😀😀😀 💛💛\nJust text'
+    }
+    ))
+
+    phrase_len = forms.IntegerField(max_value=10,required=False)
+
+
+
