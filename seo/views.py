@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph
-from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG
+from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl
+from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 
 
@@ -82,4 +82,20 @@ def knowledgeGraph(request):
     else:
         form = KnowledgeG()
         return render(request, 'seo/knowledgeG.html',{'form': form})
+
+
+def carwlLinks(request):
+    if request.method == 'POST':
+        form = Crawl(request.POST)
+        if form.is_valid():
+            links = form.cleaned_data['links']
+            links = list(map(str.strip,links.split("\n")))
+            follow_links = form.cleaned_data['follow_links']
+            
+            crawlDf = crawl(url_list=links,follow_links=follow_links)
+            return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = Crawl()
+        return render(request, 'seo/crawl.html',{'form': form})
 

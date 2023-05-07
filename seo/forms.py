@@ -66,3 +66,14 @@ class KnowledgeG(forms.Form):
     }
     ),required=False)
 
+
+class Crawl(forms.Form):
+    links = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
+    "cols": 40,
+    "placeholder": "Enter the urls you want to crawl in new line"
+    }
+    ))
+
+    follow_links = forms.BooleanField(required=False)
+
+
