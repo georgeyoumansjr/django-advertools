@@ -27,6 +27,7 @@ def index(request):
 
 urlpatterns = [
     path('',index),
+    path("select2/", include("django_select2.urls")),
     path('generate/',include('generateAds.urls')),
     path('analyse/',include('analyse.urls')),
     path('seo/',include('seo.urls')),

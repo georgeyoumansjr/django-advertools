@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_filters',
+    'django_select2',
     'generateAds.apps.GenerateadsConfig',
     'analyse.apps.AnalyseConfig',
     'seo.apps.SeoConfig',
