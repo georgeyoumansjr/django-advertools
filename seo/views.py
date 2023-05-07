@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import robotstxt_to_df, sitemap_to_df, serp_goog
-from .forms import RobotsTxt, Sitemap, SerpGoogle
+from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph
+from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG
 from decouple import config
 
 
@@ -64,3 +64,22 @@ def searchEngineResults(request):
         form = SerpGoogle()
         return render(request, 'seo/serpGoog.html',{'form': form})
     
+
+
+def knowledgeGraph(request):
+    if request.method == 'POST':
+        form = KnowledgeG(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            query = list(map(str.strip,query.split(",")))
+            languages = form.cleaned_data['languages']
+            
+            languages = list(map(str.strip,languages.split(",")))if languages else None
+            
+            knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
+            return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = KnowledgeG()
+        return render(request, 'seo/knowledgeG.html',{'form': form})
+

@@ -52,4 +52,17 @@ class SerpGoogle(forms.Form):
     ),required=False)
 
 
+class KnowledgeG(forms.Form):
+
+    query = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
+    "cols": 40,
+    "placeholder": "Enter the search query(seperate with ',' if multiple)"
+    }
+    ))
+
+    languages = forms.CharField(widget=forms.Textarea(attrs={"rows": 2, 
+    "cols": 40,
+    "placeholder": "Enter the languages for end user like\nen,es,de"
+    }
+    ),required=False)
 
