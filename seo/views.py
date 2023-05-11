@@ -53,11 +53,15 @@ def searchEngineResults(request):
             query = form.cleaned_data['query']
             query = list(map(str.strip,query.split(",")))
             gl = form.cleaned_data['geolocation']
-            print(gl)
+            # print(gl)
             # gl = list(map(str.strip,gl.split(",")))
             country = form.cleaned_data['country']
+            # language = form.cleaned_data['language']
             # country = list(map(str.strip,country.split(","))) if country else None
-            serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country)
+            if gl or country:
+                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country)
+            else:
+                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
