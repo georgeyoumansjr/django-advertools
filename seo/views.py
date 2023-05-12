@@ -62,7 +62,20 @@ def searchEngineResults(request):
 
             # country = list(map(str.strip,country.split(","))) if country else None
             if gl or country or language or rights:
-                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country,lr=language,rights=rights)
+                params = {
+                    'q': query,
+                    'cx': config('CX'),
+                    'key': config('KEY'),
+                }
+                if gl:
+                    params['gl'] = gl
+                if country:
+                    params['cr'] = country
+                if language:
+                    params['lr'] = language
+                if rights:
+                    params['rights'] = rights
+                serpDf = serp_goog(**params)
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})

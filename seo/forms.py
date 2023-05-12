@@ -69,7 +69,8 @@ class SerpGoogle(forms.Form):
                 Div('language', css_class='col-md-6 mr-2'),  
                 Div('rights', css_class='col-md-6 mr-2'),
                 css_class='row'
-            ) 
+            ),
+            Submit('submit', 'Submit', css_class='mt-2 btn'),
             
         )
     
