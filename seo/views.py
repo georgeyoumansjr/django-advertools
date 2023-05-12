@@ -96,8 +96,14 @@ def knowledgeGraph(request):
             languages = form.cleaned_data['languages']
             
             languages = list(map(str.strip,languages.split(",")))if languages else None
+
+            limit = form.cleaned_data['limit']
+            if limit:
+                knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages,limit=limit)
+            else:
+                knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
+
             
-            knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:

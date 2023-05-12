@@ -89,6 +89,8 @@ class KnowledgeG(forms.Form):
     }
     ),required=False)
 
+    limit = forms.IntegerField(required=False)
+
 
 class Crawl(forms.Form):
     links = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
