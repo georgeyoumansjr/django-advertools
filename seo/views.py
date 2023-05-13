@@ -8,7 +8,7 @@ from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_grap
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
-import os
+import os,json
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -103,8 +103,8 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
-            
-            return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center')})
+            jsonD = knowDf.to_json(orient="records")
+            return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
 
     else:
         form = KnowledgeG()

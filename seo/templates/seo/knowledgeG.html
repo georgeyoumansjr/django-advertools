@@ -3,7 +3,7 @@
 
 
 {% block css %}
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock css %}
 
 {% load crispy_forms_tags %}
@@ -26,6 +26,9 @@
                     
                 </form>
             </div>
+
+            <canvas id="myChart mt-3"></canvas>
+
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if knowDf %}
                     {{ knowDf | safe }}
@@ -39,10 +42,69 @@
 
 {% block javascript %}
 <script>
-    $(document).ready(function () {
-        $('select').select2();
-     });
-   
+    const jsonData = {{ json|safe }};
+    console.log(jsonData);
+
+
+    function createChart(jsonData) {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var labels = jsonData.map(function(obj) {
+            return obj["result.name"];
+        });
+        var data = jsonData.map(function(obj) {
+            return obj["resultScore"];
+        });
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: 'Result Score',
+                data: data,
+                borderColor: 'blue',
+                fill: false
+            }]
+            },
+            options: {
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                xAxes: [{
+                    ticks: {
+                    callback: function(value, index, values) {
+                        if (value.length > 7) {
+                        return value.substr(0, 7) + '...';
+                        } else {
+                        return value;
+                        }
+                    }
+                    },
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Result Name'
+                    }
+                }],
+                yAxes: [{
+                display: true,
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Knowledge Graph Score'
+                }
+                }]
+            }
+            }
+        });
+    }
+    const top5 = jsonData.slice(0,5);
+    createChart(jsonData);
+
 </script>
 
 
