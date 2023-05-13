@@ -11,7 +11,7 @@
 <div class="container">
     <div class="container">
         <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <form method="post">
                     {% csrf_token %}
                     <fieldset class="form-group">
@@ -27,7 +27,13 @@
                 </form>
             </div>
 
-            <canvas id="myChart mt-3"></canvas>
+            <div class="col-md-10">
+                <canvas id="myChart" class="mt-3"></canvas>
+
+            </div>
+            <div class="col-md-10">
+                <canvas id="lineChart" class="mt-3"></canvas>
+            </div>
 
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if knowDf %}
@@ -46,7 +52,7 @@
     console.log(jsonData);
 
 
-    function createChart(jsonData) {
+    function createLineChart(jsonData) {
         var ctx = document.getElementById('myChart').getContext('2d');
         var labels = jsonData.map(function(obj) {
             return obj["result.name"];
@@ -59,7 +65,7 @@
             data: {
             labels: labels,
             datasets: [{
-                label: 'Result Score',
+                label: 'Knowledge Graph query result score',
                 data: data,
                 borderColor: 'blue',
                 fill: false
@@ -102,8 +108,56 @@
             }
         });
     }
-    const top5 = jsonData.slice(0,5);
-    createChart(jsonData);
+    const top5 = jsonData.slice(0,10);
+    createLineChart(top5);
+
+    function createBarChart(jsonData) {
+        var ctx = document.getElementById('lineChart').getContext('2d');
+        var labels = jsonData.map(function(obj) {
+            return obj["result.@type"];
+        });
+        labels = labels.flat();
+        const counts = labels.reduce((acc, value) => {
+        if (value in acc) {
+            acc[value]++;
+        } else {
+            acc[value] = 1;
+        }
+        return acc;
+        }, {});
+        labels = Object.keys(counts);
+        var data = Object.values(counts);
+
+        // Define the chart data
+        var data = {
+        labels: labels,
+        datasets: [{
+            label: 'Mostly Repeated entity type',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            data: data
+        }]
+        };
+
+        // Create the chart
+        var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+            yAxes: [{
+                ticks: {
+                beginAtZero: true
+                }
+            }]
+            }
+        }
+        });
+    }
+
+    // Call the function to create the chart
+    createBarChart(jsonData);
 
 </script>
 
