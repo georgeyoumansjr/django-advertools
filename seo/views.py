@@ -78,7 +78,8 @@ def searchEngineResults(request):
                 serpDf = serp_goog(**params)
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
-            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
+            jsonD = serpDf.to_json(orient="records")
+            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
 
     else:
         # print(SERP_GOOG_VALID_VALS)
@@ -133,7 +134,10 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
+            jsonD = crawlDf.to_json(orient="records")
+            return render(request,'seo/crawl.html',{'form': form,
+                                                    'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center'),
+                                                    'json': jsonD})
 
     else:
         if os.path.exists('crawl_output.jl'):
