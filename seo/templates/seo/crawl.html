@@ -12,20 +12,27 @@
     <div class="container">
         <div class="row d-flex justify-content-center">
             <div class="col-md-6">
-                <form method="post">
+                <form method="post" id="crawlf">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Crawl Urls</legend>
                         {{ form|crispy }}
                     </fieldset>
                     <div class="form-group">
-                        <button class="btn btn-outline-info" type="submit">
+                        <button id="submitb" class="btn btn-outline-info" type="submit" onclick="disableButton()">
                             Crawl links
                         </button>
                     </div>
                     
                 </form>
             </div>
+
+            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
+                {% if describe %}
+                    {{ describe | safe }}
+                {% endif %}
+            </div>
+
             <div class="col-md-10">
                 <canvas id="myChart" class="mt-3"></canvas>
 
@@ -46,6 +53,13 @@
 
 {% block javascript %}
 <script>
+    function disableButton() {
+        var button = document.getElementById('submitb');
+        button.disabled = true; // Disable the button
+
+        var form = document.getElementById('crawlf');
+        form.submit(); // Submit the form
+    }
 
     const jsonData = {{ json|safe }};
     console.log(jsonData);
