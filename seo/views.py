@@ -157,14 +157,18 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            describe = crawlDf.describe()
-            print(describe)
-
-        
+            describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+            
+            status = crawlDf["status"].value_counts()
+            status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
+            status.reset_index(inplace=True)
+            status.columns = ['status','frequency','percentage']
+           
 
             jsonD = crawlDf.to_json(orient="records")
             return render(request,'seo/crawl.html',{'form': form,
-                                                    'describe': describe.to_html(classes='table table-striped', justify='center'),
+                                                    'describe': describe.to_dict(),
+                                                    'statusJ': status.to_json(),
                                                     'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
                                                     'json': jsonD})
 
