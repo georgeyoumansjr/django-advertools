@@ -128,6 +128,7 @@ def knowledgeGraph(request):
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
             jsonD = knowDf.to_json(orient="records")
+            
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
 
     else:
@@ -136,6 +137,7 @@ def knowledgeGraph(request):
 
 
 def carwlLinks(request):
+    overview = False
     if request.method == 'POST':
         form = Crawl(request.POST)
         if form.is_valid():
@@ -166,15 +168,17 @@ def carwlLinks(request):
            
 
             jsonD = crawlDf.to_json(orient="records")
+            overview = True
             return render(request,'seo/crawl.html',{'form': form,
                                                     'describe': describe.to_dict(),
                                                     'statusJ': status.to_json(),
                                                     'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
-                                                    'json': jsonD})
+                                                    'json': jsonD,
+                                                    'overview':overview})
 
     else:
         if os.path.exists('crawl_output.jl'):
             os.remove('crawl_output.jl')
         form = Crawl()
-        return render(request, 'seo/crawl.html',{'form': form})
+        return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
 

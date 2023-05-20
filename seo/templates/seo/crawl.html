@@ -27,6 +27,7 @@
                 </form>
             </div>
 
+            {% if overview %}
             <div class="col-md-12 mt-3">
                 <div class="row justify-content-between">
                     <div class="col-md-6">
@@ -51,13 +52,13 @@
                             <div class="container m-2">
                                 <h5 class="h5 card-title fw-bold">Size Overview</h5>
                                 <div class="card-body">
-                                    <b>Average Size of Content:</b> {{ describe.size.mean|floatformat:1 }} sec.
+                                    <b>Average Size of Content:</b> {{ describe.size.mean|floatformat:1 }} bytes.
                                 </div>
                                 <div class="card-body">
-                                    <b>Max Size of Content:</b> {{ describe.size.max|floatformat:1 }} sec.
+                                    <b>Max Size of Content:</b> {{ describe.size.max|floatformat:1 }} bytes.
                                 </div>
                                 <div class="card-body">
-                                    <b>Minimum Size of Content:</b> {{ describe.size.min|floatformat:1 }} sec.
+                                    <b>Minimum Size of Content:</b> {{ describe.size.min|floatformat:1 }} bytes.
                                 </div>
                             </div>
                         </div>
@@ -65,7 +66,7 @@
 
                 </div>
             </div>
-
+            {% endif %}
             <div class="col-md-4 mt-2">
                 <canvas id="donutChart"></canvas>
             </div>
