@@ -110,7 +110,7 @@ def searchEngineResults(request):
             domains_df.reset_index(inplace=True)
             domains_df.columns = ['displayLink','frequency','percentage']
 
-            rank_df = serpDf[["searchTerms","displayLink","rank","title","link"]].head(10)
+            rank_df = serpDf[["searchTerms","displayLink","rank","link"]].head(10)
             # print(rank_df)
             ## convert to html
             rank_df.rename(columns={"displayLink":"domain"},inplace=True)
