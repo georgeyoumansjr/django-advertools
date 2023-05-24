@@ -59,10 +59,31 @@
 
     document.getElementById('descriptiveForm').addEventListener('submit', function(event) {
         event.preventDefault(); // Prevent the form from being submitted
-
+        
+        const formdata = new FormData(this);
+        console.log(formdata);
         // Perform form validation
         if (validateForm()) {
-            this.submit(); // Submit the form if validation succeeds
+            console.log("done")
+
+            // fetch(this.action, {
+            //     method: this.method,
+            //     body: formData
+            // })
+            // .then(response => {
+            //     if (response.ok) {
+            //         // Handle successful form submission
+            //         console.log('Form submitted successfully');
+            //     } else {
+            //         // Handle form submission error
+            //         console.error('Form submission failed');
+            //     }
+            // })
+            // .catch(error => {
+            //     // Handle request error
+            //     console.error('Request failed', error);
+            // });
+            this.submit()
         }
     });
 
@@ -72,8 +93,9 @@
         // Perform form validation logic
         // Return true if the form is valid, false otherwise
         var description_text = document.getElementById('id_description_text').value;
+        var slots = document.getElementById('id_slots').value;
         
-
+        
         // Perform validation checks
         if (description_text === '') {
             alert('Description Text must be added for the field');
@@ -102,7 +124,7 @@
         
 
         // Perform validation checks
-        if (description_text === '' || replacements === '' || fallback === '') {
+        if (template === '' || replacements === '' || fallback === '') {
             alert('Template, replacements, fallback should not be empty for large Ads form');
             return false;
         }

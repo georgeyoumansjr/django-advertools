@@ -59,9 +59,26 @@ def sitemapToDf(request):
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
             jsonD = df.to_json(orient="records")
+
+            check_http = df[["loc"]].copy()
+            print(check_http)
+            check_http["https"] = list(
+                map(lambda x: x.startswith('https'), check_http['loc']))
+            
+            print(check_http)
+            unique_counts = check_http["https"].value_counts()
+
+            new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(check_http)*100})
+            new_Df.reset_index(inplace=True)
+            new_Df.columns = ['https','frequency','percentage'] 
+
+            # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
+            unique = new_Df.to_json()
+
            
             return render(request,'seo/sitemap.html',{'form': form,
                                                       'json': jsonD,
+                                                      'unique': unique,
                                                       'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
 
     else:
