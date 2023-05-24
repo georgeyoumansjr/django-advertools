@@ -63,7 +63,7 @@ def generateAds(request):
                     'large_ads': generateLargeAds
                 })
 
-                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+                return render(request,'generateAds/advertisement.html',{'descriptive_form': form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
             
         elif 'large_form_submit' in request.POST:
             form = LargeScaleAds(request.POST)
@@ -97,7 +97,7 @@ def generateAds(request):
                     'large_ads': generateLargeAds
                 })
 
-                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
         
 
     else:
