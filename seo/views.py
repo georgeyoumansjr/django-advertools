@@ -61,7 +61,8 @@ def sitemapToDf(request):
             jsonD = df.to_json(orient="records")
 
 
-            overview = df.loc.describe()
+            overview = df["loc"].describe()
+            print(overview)
 
             check_http = df[["loc"]].copy()
             print(check_http)
