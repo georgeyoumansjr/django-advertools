@@ -9,6 +9,8 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 import os,json
+import logging
+logger = logging.getLogger(__name__)
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -62,14 +64,14 @@ def sitemapToDf(request):
 
 
             overview = df["loc"].describe()
-            print(overview)
+            # print(overview)
 
             check_http = df[["loc"]].copy()
-            print(check_http)
+            # print(check_http)
             check_http["https"] = list(
                 map(lambda x: x.startswith('https'), check_http['loc']))
             
-            print(check_http)
+            # print(check_http)
             unique_counts = check_http["https"].value_counts()
 
             new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(check_http)*100})
@@ -78,6 +80,7 @@ def sitemapToDf(request):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
+            logger.info("Successfully create neccessary dataframe visuals")
 
            
             return render(request,'seo/sitemap.html',{'form': form,
@@ -87,6 +90,7 @@ def sitemapToDf(request):
                                                       'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
 
     else:
+        logger.info("data helled")
         form = Sitemap()
         return render(request,'seo/sitemap.html',{'form': form})
 
@@ -121,9 +125,6 @@ def searchEngineResults(request):
                 if rights:
                     params['rights'] = rights
                 serpDf = serp_goog(**params)
-
-                
-
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
