@@ -186,9 +186,13 @@ def carwlLinks(request):
         form = Crawl(request.POST)
         if form.is_valid():
             links = form.cleaned_data['links']
-            links = list(map(str.strip,links.split("\n")))
-            follow_links = form.cleaned_data['follow_links']
-            headers_only = form.cleaned_data['headers_only']
+            if not links.startswith("http"):
+                logger.warning("Improper links")
+                return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
+            else:
+                links = list(map(str.strip,links.split("\n")))
+                follow_links = form.cleaned_data['follow_links']
+                headers_only = form.cleaned_data['headers_only']
 
             if headers_only:
                 if os.path.exists('crawl_output.jl'):
