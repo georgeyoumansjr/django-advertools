@@ -6,14 +6,30 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
+
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
+from ydata_profiling import ProfileReport
 import os,json
 import logging
 logger = logging.getLogger(__name__)
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
+
+
+def generateReport(df,minimal=False,title="Profile Report"):
+
+    # try:
+    profile = ProfileReport(df,minimal=minimal,title=title)
+    profile.to_file(os.path.join('templates',"report.html"))
+    return True
+    #     return True
+    # except Exception as e:
+    #     print(e)
+    #     return False
+
+
 
 def robotsToDf(request,filters=None):
 
@@ -25,8 +41,7 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            # overview = df.describe()
-            # print(overview)
+            generateReport(df,title="Robots.txt Data profile")
 
             unique_counts = df["directive"].value_counts()
             
@@ -56,6 +71,9 @@ def sitemapToDf(request):
 
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
+
+            generateReport(df)
+
             jsonD = df.to_json(orient="records")
 
 
@@ -123,6 +141,8 @@ def searchEngineResults(request):
                 serpDf = serp_goog(**params)
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+            
+            generateReport(serpDf)
             
             domains_df = serpDf['displayLink'].value_counts()
             domains_df = pd.DataFrame({'frequency': domains_df,'percentage':domains_df/len(serpDf)*100})
