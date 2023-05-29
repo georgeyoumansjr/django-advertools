@@ -20,20 +20,16 @@ def robotsToDf(request,filters=None):
     if request.method == 'POST':
         form = RobotsTxt(request.POST)
         if form.is_valid():
+            
             urls = form.cleaned_data['urls']
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
+            # overview = df.describe()
+            # print(overview)
 
             unique_counts = df["directive"].value_counts()
-            # percentage = unique_counts / len(df) * 100
-            # # print(percentage)
-            # percentage.reset_index()
-            # percentage.columns = ["directive", 'percentage']
             
-            # unique_counts.reset_index()
-            # # # Rename the columns in the new DataFrame
-            # unique_counts.columns = ["directive", 'Count of unique']
             new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
             new_Df.reset_index(inplace=True)
             new_Df.columns = ['directive','frequency','percentage'] 
