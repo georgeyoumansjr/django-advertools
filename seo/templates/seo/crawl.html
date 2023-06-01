@@ -11,7 +11,7 @@
 <div class="container">
     <div class="container">
         <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <form method="post" id="crawlf" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
@@ -81,6 +81,9 @@
             </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if crawlDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ crawlDf | safe }}
                 {% endif %}
             </div>

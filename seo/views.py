@@ -72,7 +72,8 @@ def sitemapToDf(request):
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
 
-            generateReport(df)
+            generateReport(df,title="Sitemap Data profile")
+
 
             jsonD = df.to_json(orient="records")
 
@@ -142,7 +143,8 @@ def searchEngineResults(request):
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
-            generateReport(serpDf)
+            generateReport(serpDf,title="SERP Data profile")
+
             
             domains_df = serpDf['displayLink'].value_counts()
             domains_df = pd.DataFrame({'frequency': domains_df,'percentage':domains_df/len(serpDf)*100})
@@ -187,6 +189,8 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
+            generateReport(knowDf,title="Knowledge Graph Data profile")
+
             jsonD = knowDf.to_json(orient="records")
             
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
@@ -222,6 +226,9 @@ def carwlLinks(request):
                     os.remove('crawl_output.jl')
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
+
+            generateReport(crawlDf,title="Crawling Data Set profile")
+
 
             describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
             

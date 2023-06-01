@@ -36,11 +36,15 @@
             </div>
             <div class="col-md-11 mt-2">
                 {% if rankDf %}
+                    <h3 class="h3 text-secondary">Top 10 Data Found</h3>
                     {{ rankDf | safe }}
                 {% endif %}
             </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if serpDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ serpDf | safe }}
                 {% endif %}
             </div>

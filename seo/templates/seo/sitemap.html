@@ -59,6 +59,9 @@
             </div>
             <div class="col-md-12 mt-4" style="height: 600px; overflow-y: scroll;">
                 {% if siteDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ siteDf | safe }}
                 {% endif %}
             </div>
