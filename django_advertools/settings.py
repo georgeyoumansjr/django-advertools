@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure--q3ja9e($2v$6e--yq3sjmkzsup24hzj9l5a7&$9w0r#62u3p%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1"
+    ]
 
 
 # Application definition
@@ -57,8 +60,11 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 ]
+
+SECURE_FRAME_DENY = False
 
 ROOT_URLCONF = 'django_advertools.urls'
 
