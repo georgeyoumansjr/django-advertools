@@ -9,25 +9,28 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
-from ydata_profiling import ProfileReport
+# from ydata_profiling import ProfileReport
+from celery.result import AsyncResult
+from seo.tasks import generateReport
 import os,json
 import logging
 logger = logging.getLogger(__name__)
+
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
 
 
-def generateReport(df,minimal=False,title="Profile Report"):
+# def generateReport(df,minimal=False,title="Profile Report"):
 
-    # try:
-    profile = ProfileReport(df,minimal=minimal,title=title)
-    profile.to_file(os.path.join('templates',"report.html"))
-    return True
-    #     return True
-    # except Exception as e:
-    #     print(e)
-    #     return False
+#     # try:
+#     profile = ProfileReport(df,minimal=minimal,title=title)
+#     profile.to_file(os.path.join('templates',"report.html"))
+#     return True
+#     #     return True
+#     # except Exception as e:
+#     #     print(e)
+        # return False
 
 
 
@@ -41,7 +44,9 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            generateReport(df,title="Robots.txt Data profile")
+            report_gen = AsyncResult(generateReport.delay(df.to_json(),title="Robots.txt Data profile"))
+            if report_gen:
+                logger.info("Robots txt genereted df")
 
             unique_counts = df["directive"].value_counts()
             
