@@ -10,8 +10,9 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
+from django.contrib import messages
 from celery.result import AsyncResult
-from seo.tasks import generateReport
+from seo.tasks import generateReport, add
 import os,json
 import logging
 logger = logging.getLogger(__name__)
@@ -44,9 +45,12 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            report_gen = AsyncResult(generateReport.delay(df.to_json(),title="Robots.txt Data profile"))
-            if report_gen:
-                logger.info("Robots txt genereted df")
+            # report_gen = AsyncResult(generateReport.delay(df.to_json(),title="Robots.txt Data profile"))
+            # task = add.delay(1,2)
+            # print(task.status)
+            # print(task.id)
+            # if report_gen:
+            #     logger.info("Robots txt genereted df")
 
             unique_counts = df["directive"].value_counts()
             
@@ -56,7 +60,9 @@ def robotsToDf(request,filters=None):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
-
+           
+            messages.success(request,f'Robots txt dataset viewed successfully')
+            
             # jsonD = df.to_json(orient="records")
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
@@ -100,6 +106,7 @@ def sitemapToDf(request):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
+            messages.success(request,f'Sitemap dataset viewed successfully')
             logger.info("Successfully create neccessary dataframe visuals")
 
            
@@ -108,9 +115,10 @@ def sitemapToDf(request):
                                                       'unique': unique,
                                                       'overview': overview.to_dict(),
                                                       'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
-
+        else:
+            messages.error(request,f'Invalid form values')
     else:
-        logger.info("data helled")
+        # logger.info("data helled")
         form = Sitemap()
         return render(request,'seo/sitemap.html',{'form': form})
 

@@ -14,3 +14,7 @@ def generateReport(df,minimal=False,title="Profile Report"):
         print(e)
         return False
 
+
+@shared_task
+def add(a,b):
+    return a+b
