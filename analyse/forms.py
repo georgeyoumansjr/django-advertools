@@ -44,3 +44,5 @@ class DatasetExtract(forms.ModelForm):
         fields = ['file_title','file_field']
 
 
+class DatasetSelect(forms.Form):
+    file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all())
