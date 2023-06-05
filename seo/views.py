@@ -45,7 +45,12 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            # report_gen = AsyncResult(generateReport.delay(df.to_json(),title="Robots.txt Data profile"))
+            # json_df = df.to_json()
+
+            # print(json_df)
+            # print(type(json_df))
+            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            # report_gen = AsyncResult()
             # task = add.delay(1,2)
             # print(task.status)
             # print(task.id)
@@ -83,7 +88,7 @@ def sitemapToDf(request):
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
 
-            generateReport(df,title="Sitemap Data profile")
+            generateReport.delay(df.to_json(),title="Sitemap Data profile")
 
 
             jsonD = df.to_json(orient="records")
@@ -156,7 +161,7 @@ def searchEngineResults(request):
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
-            generateReport(serpDf,title="SERP Data profile")
+            generateReport.delay(serpDf.to_json(),title="SERP Data profile")
 
             
             domains_df = serpDf['displayLink'].value_counts()
@@ -202,7 +207,7 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
-            generateReport(knowDf,title="Knowledge Graph Data profile")
+            generateReport.delay(knowDf.to_json(),title="Knowledge Graph Data profile")
 
             jsonD = knowDf.to_json(orient="records")
             
@@ -240,7 +245,8 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            generateReport(crawlDf,title="Crawling Data Set profile")
+            jsonD = crawlDf.to_json(orient="records")
+            generateReport.delay(jsonD,title="Crawling Data Set profile")
 
 
             describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
@@ -250,8 +256,7 @@ def carwlLinks(request):
             status.reset_index(inplace=True)
             status.columns = ['status','frequency','percentage']
            
-
-            jsonD = crawlDf.to_json(orient="records")
+            
             overview = True
             return render(request,'seo/crawl.html',{'form': form,
                                                     'describe': describe.to_dict(),

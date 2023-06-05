@@ -7,7 +7,7 @@ import pandas as pd
 def generateReport(df,minimal=False,title="Profile Report"):
     load_df = pd.read_json(df)
     try:
-        profile = ProfileReport(df,minimal=minimal,title=title)
+        profile = ProfileReport(load_df,minimal=minimal,title=title)
         profile.to_file(os.path.join('templates',"report.html"))
         return True
     except Exception as e:
