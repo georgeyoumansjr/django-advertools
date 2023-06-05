@@ -118,7 +118,7 @@ def getDataset(request):
             # print(df)
             # df = pd.DataFrame.from_dict(df,orient='index')
             # df = df.transpose()
-            return render(request,'analyse/extraction.html',{'form': form})
+            return redirect("home")
         else:
             print(form.cleaned_data)
             return HttpResponse("form invalid")
