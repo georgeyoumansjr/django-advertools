@@ -5,7 +5,18 @@ from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
 from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import url_to_df, emoji_search, extract_emoji, stopwords,word_frequency
+from advertools import ( url_to_df, 
+                        emoji_search, 
+                        extract_emoji, 
+                        stopwords,
+                        word_frequency, 
+                        extract_intense_words,
+                        extract_hashtags,
+                        extract_mentions,
+                        extract_numbers,
+                        extract_questions,
+                        extract_urls
+                        )
 from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis, DatasetExtract, DatasetSelect
 from .utils import url_structure
 from .models import DatasetFile
@@ -118,7 +129,7 @@ def getDataset(request):
             # print(df)
             # df = pd.DataFrame.from_dict(df,orient='index')
             # df = df.transpose()
-            return redirect("home")
+            return redirect("datasetT")
         else:
             print(form.cleaned_data)
             return HttpResponse("form invalid")
@@ -128,26 +139,49 @@ def getDataset(request):
 
 
 def dataSetAnalysis(request):
+    submission = False
+
     if request.method == 'POST':
         form = DatasetSelect(request.POST)
         # print(form)
         if form.is_valid():
-            print(form.cleaned_data)
-            # form.save()
-            data, created = DatasetFile.objects.get_or_create(**form.cleaned_data)
-            # print(data)
-            if created:
-                messages.success(request,f'The dataset has been successfully added')
-            else:
-                messages.warning(request,f'The dataset {data.file_title}:{data.file_field} already exits.')
-            # print(df)
-            # df = pd.DataFrame.from_dict(df,orient='index')
-            # df = df.transpose()
-            return redirect("home")
+            form_data = form.cleaned_data
+            
+            dataset_val = form_data["file_title"]
+            column_name = form_data["column_name"]
+            df = pd.read_csv(dataset_val.file_field)
+            listCol = df[column_name.strip()].to_list()
+            
+            urls = extract_urls(listCol)
+            
+            mentions = extract_mentions(listCol)
+            
+            questions = extract_questions(listCol)
+            
+            numbers = extract_numbers(listCol)
+            
+            hashtags = extract_hashtags(listCol)
+            
+            intense_words = extract_intense_words(listCol,min_reps=3) #minimum repertition of words 3
+            
+
+            submission = True
+            
+            return render(request,'analyse/analyzeText.html',{
+                'form': form,
+                'textDf': df.to_html(classes='table table-striped text-center', justify='center'),
+                'submission':submission,
+                'urls': urls,
+                'mentions': mentions,
+                'questions': questions,
+                'numbers': numbers, 
+                'hashtags': hashtags,
+                'intense_words': intense_words
+                })
         else:
             print(form.cleaned_data)
             return HttpResponse("form invalid")
     else:
         form = DatasetSelect()
-        return render(request,'analyse/extraction.html',{'form': form})
+        return render(request,'analyse/analyzeText.html',{'form': form,'submission':submission})
 

@@ -17,9 +17,12 @@ import os,json
 import logging
 logger = logging.getLogger(__name__)
 
-
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
+# from parallel_pandas import ParallelPandas
+
+#initialize parallel-pandas
+# ParallelPandas.initialize(disable_pr_bar=True)
 
 
 # def generateReport(df,minimal=False,title="Profile Report"):
@@ -243,27 +246,32 @@ def carwlLinks(request):
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
+                
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            jsonD = crawlDf.to_json(orient="records")
-            generateReport.delay(jsonD,title="Crawling Data Set profile")
+            if crawlDf.empty:
+                messages.error(request,"Empty columns observed this url may not be crawlable")
+                return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
+            else:
+                jsonD = crawlDf.to_json(orient="records")
+                generateReport.delay(jsonD,title="Crawling Data Set profile")
 
 
-            describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+                describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+                
+                status = crawlDf["status"].value_counts()
+                status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
+                status.reset_index(inplace=True)
+                status.columns = ['status','frequency','percentage']
             
-            status = crawlDf["status"].value_counts()
-            status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
-            status.reset_index(inplace=True)
-            status.columns = ['status','frequency','percentage']
-           
-            
-            overview = True
-            return render(request,'seo/crawl.html',{'form': form,
-                                                    'describe': describe.to_dict(),
-                                                    'statusJ': status.to_json(),
-                                                    'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
-                                                    'json': jsonD,
-                                                    'overview':overview})
+                
+                overview = True
+                return render(request,'seo/crawl.html',{'form': form,
+                                                        'describe': describe.to_dict(),
+                                                        'statusJ': status.to_json(),
+                                                        'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
+                                                        'json': jsonD,
+                                                        'overview':overview})
 
     else:
         if os.path.exists('crawl_output.jl'):
