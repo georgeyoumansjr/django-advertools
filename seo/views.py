@@ -250,7 +250,7 @@ def carwlLinks(request):
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
             if crawlDf.empty:
-                messages.error(request,"Empty columns observed this url may not be crawlable")
+                messages.warning(request,"Empty columns observed this url may not be crawlable")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
                 jsonD = crawlDf.to_json(orient="records")

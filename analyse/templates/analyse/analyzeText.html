@@ -74,6 +74,12 @@
                         <button class="btn btn-outline-info" type="submit">
                             Analyze
                         </button>
+                        <hr />
+                        <p>OR</p>
+                        <hr />
+                        <a class="btn btn-info" href="{% url 'upload' %}">
+                            Upload
+                        </a>
                     </div>
                 </form>
             </div>
@@ -154,7 +160,7 @@
             <div class="col-md-12 mt-4">
                 <div class="row d-flex justify-content-center mt-2">
                     {% if urls.urls_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             URLs 
                         </h5>
@@ -166,7 +172,7 @@
                     </div>
                     {% endif %}
                     {% if mentions.mentions_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             Mentions 
                         </h5>
@@ -178,7 +184,7 @@
                     </div>
                     {% endif %}
                     {% if questions.question_marks_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             Questions
                         </h5>
@@ -190,7 +196,7 @@
                     </div>
                     {% endif %}
                     {% if hashtags.hashtags_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             Hashtags 
                         </h5>
@@ -202,7 +208,7 @@
                     </div>
                     {% endif %}
                     {% if numbers.numbers_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             Numbers 
                         </h5>
@@ -214,7 +220,7 @@
                     </div>
                     {% endif %}
                     {% if intense_words.intense_words_flat %}
-                    <div class="col-md-6 col-sm-12 col-xl-4">
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
                         <h5 class="h5">
                             Intense Words 
                         </h5>

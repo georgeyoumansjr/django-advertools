@@ -118,7 +118,7 @@ def getDataset(request):
         form = DatasetExtract(request.POST,request.FILES)
         # print(form)
         if form.is_valid():
-            print(form.cleaned_data)
+            # print(form.cleaned_data)
             # form.save()
             data, created = DatasetFile.objects.get_or_create(**form.cleaned_data)
             # print(data)
@@ -179,7 +179,7 @@ def dataSetAnalysis(request):
                 'intense_words': intense_words
                 })
         else:
-            print(form.cleaned_data)
+            # print(form.cleaned_data)
             return HttpResponse("form invalid")
     else:
         form = DatasetSelect()
