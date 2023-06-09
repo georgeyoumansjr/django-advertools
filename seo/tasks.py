@@ -5,6 +5,7 @@ import pandas as pd
 
 @shared_task
 def generateReport(df,minimal=False,title="Profile Report"):
+    print(title +" "+ str(minimal))
     load_df = pd.read_json(df)
     try:
         profile = ProfileReport(load_df,minimal=minimal,title=title)

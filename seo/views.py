@@ -245,7 +245,12 @@ def carwlLinks(request):
             else:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
-                crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
+                crawlDf = crawl(
+                    url_list=links,output_file="crawl_output.jl",follow_links=follow_links,
+                    custom_settings={
+                        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                    }
+                    )
                 
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
@@ -253,9 +258,8 @@ def carwlLinks(request):
                 messages.warning(request,"Empty columns observed this url may not be crawlable")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
-                jsonD = crawlDf.to_json(orient="records")
-                generateReport.delay(jsonD,title="Crawling Data Set profile")
-
+                jsonD = crawlDf.to_json()
+                generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
 
                 describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
                 
