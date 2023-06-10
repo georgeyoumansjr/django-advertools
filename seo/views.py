@@ -52,7 +52,7 @@ def robotsToDf(request,filters=None):
 
             # print(json_df)
             # print(type(json_df))
-            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            message = generateReport.delay(df.to_json(),title="Robots.txt Data profile")
             # report_gen = AsyncResult()
             # task = add.delay(1,2)
             # print(task.status)
@@ -60,14 +60,19 @@ def robotsToDf(request,filters=None):
             # if report_gen:
             #     logger.info("Robots txt genereted df")
 
-            unique_counts = df["directive"].value_counts()
+            # messages.warning(request,message)
+            unique = None
             
-            new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
-            new_Df.reset_index(inplace=True)
-            new_Df.columns = ['directive','frequency','percentage'] 
+            if "directive" in df:
+                unique_counts = df["directive"].value_counts()
+                
+                new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
+                new_Df.reset_index(inplace=True)
+                new_Df.columns = ['directive','frequency','percentage'] 
 
-            # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
-            unique = new_Df.to_json()
+                # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
+                unique = new_Df.to_json()
+            
            
             messages.success(request,f'Robots txt dataset viewed successfully')
             

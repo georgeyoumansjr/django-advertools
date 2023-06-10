@@ -138,7 +138,9 @@
     }
     // Call the function to create the chart
     // const top5 = jsonData.slice(0,5);
-    createDonutChart(jsonData);
+    if (jsonData){
+        createDonutChart(jsonData);
+    }
     
     
 </script>

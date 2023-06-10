@@ -99,7 +99,7 @@ class Crawl(forms.Form):
     }
     ))
 
-    follow_links = forms.BooleanField(required=False)
+    follow_links = forms.BooleanField(required=False,help_text="Crawl all reachable links from page")
 
     headers_only = forms.BooleanField(required=False)
 
