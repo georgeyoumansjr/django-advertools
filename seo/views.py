@@ -92,15 +92,17 @@ def sitemapToDf(request):
         if form.is_valid():
             
             urls = form.cleaned_data['urls']
-
-            # urls = list(map(str.strip,urls.split("\n")))
-            df = sitemap_to_df(urls)
+            try:
+                # urls = list(map(str.strip,urls.split("\n")))
+                df = sitemap_to_df(urls)
+            except Exception as e:
+                # print(e)
+                messages.warning(request,"The url was not able to convert to a dataframe")
+                return render(request,'seo/sitemap.html',{'form': form})
 
             generateReport.delay(df.to_json(),title="Sitemap Data profile")
 
-
             jsonD = df.to_json(orient="records")
-
 
             overview = df["loc"].describe()
             # print(overview)
@@ -178,8 +180,7 @@ def searchEngineResults(request):
             domains_df.columns = ['displayLink','frequency','percentage']
 
             rank_df = serpDf[["searchTerms","displayLink","rank","link"]].head(10)
-            # print(rank_df)
-            ## convert to html
+            
             rank_df.rename(columns={"displayLink":"domain"},inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(classes='table', justify='center')
         
@@ -253,6 +254,7 @@ def carwlLinks(request):
                 crawlDf = crawl(
                     url_list=links,output_file="crawl_output.jl",follow_links=follow_links,
                     custom_settings={
+                        # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
                         'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
                     }
                     )
