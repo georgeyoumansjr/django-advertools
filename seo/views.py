@@ -240,10 +240,16 @@ def carwlLinks(request):
                 links = list(map(str.strip,links.split("\n")))
                 follow_links = form.cleaned_data['follow_links']
                 headers_only = form.cleaned_data['headers_only']
-
-            if headers_only:
+            
+            try:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
+            except PermissionError:
+                messages.warning(request,"Somebody Else is using this service")
+                return HttpResponseRedirect("home")
+
+            if headers_only:
+                
                 crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl")
 
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
@@ -253,9 +259,12 @@ def carwlLinks(request):
                     os.remove('crawl_output.jl')
                 crawlDf = crawl(
                     url_list=links,output_file="crawl_output.jl",follow_links=follow_links,
+
                     custom_settings={
                         # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
-                        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                        'CLOSESPIDER_PAGECOUNT': 1,
+                        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                        'LOG_FILE': 'output_file.log',
                     }
                     )
                 
