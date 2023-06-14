@@ -8,10 +8,10 @@ from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_grap
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 
 from decouple import config
-from advertools import SERP_GOOG_VALID_VALS
+# from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
 from django.contrib import messages
-from celery.result import AsyncResult
+# from celery.result import AsyncResult
 from seo.tasks import generateReport, add
 import os,json
 import logging
@@ -47,20 +47,12 @@ def robotsToDf(request,filters=None):
             urls = form.cleaned_data['urls']
 
             urls = list(map(str.strip,urls.split("\n")))
+            urls = [url for url in urls if url.startswith("http")]
+            
             df = robotstxt_to_df(urls)
-            # json_df = df.to_json()
-
-            # print(json_df)
-            # print(type(json_df))
+            
             message = generateReport.delay(df.to_json(),title="Robots.txt Data profile")
-            # report_gen = AsyncResult()
-            # task = add.delay(1,2)
-            # print(task.status)
-            # print(task.id)
-            # if report_gen:
-            #     logger.info("Robots txt genereted df")
-
-            # messages.warning(request,message)
+            
             unique = None
             
             if "directive" in df:
@@ -70,13 +62,16 @@ def robotsToDf(request,filters=None):
                 new_Df.reset_index(inplace=True)
                 new_Df.columns = ['directive','frequency','percentage'] 
 
-                # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
+                
                 unique = new_Df.to_json()
             
-           
-            messages.success(request,f'Robots txt dataset viewed successfully')
+                messages.success(request,f'Robots txt dataset viewed successfully')
             
-            # jsonD = df.to_json(orient="records")
+            if df.empty:
+                messages.warning(request, "No columns in the dataframe")
+           
+            
+            
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
                                                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
@@ -153,23 +148,30 @@ def searchEngineResults(request):
             rights = form.cleaned_data['rights']
 
             # country = list(map(str.strip,country.split(","))) if country else None
-            if gl or country or language or rights:
-                params = {
-                    'q': query,
-                    'cx': config('CX'),
-                    'key': config('KEY'),
-                }
-                if gl:
-                    params['gl'] = gl
-                if country:
-                    params['cr'] = country
-                if language:
-                    params['lr'] = language
-                if rights:
-                    params['rights'] = rights
-                serpDf = serp_goog(**params)
-            else:
-                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+            try:
+                if gl or country or language or rights:
+                    params = {
+                        'q': query,
+                        'cx': config('CX'),
+                        'key': config('KEY'),
+                    }
+                    if gl:
+                        params['gl'] = gl
+                    if country:
+                        params['cr'] = country
+                    if language:
+                        params['lr'] = language
+                    if rights:
+                        params['rights'] = rights
+                    
+                    serpDf = serp_goog(**params)
+                else:
+                    serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+            
+            except Exception as e:
+                print(e)
+                messages.warning(request,"Unable to make a query for invalid data")
+                return render(request, 'seo/serpGoog.html',{'form': form})
             
             generateReport.delay(serpDf.to_json(),title="SERP Data profile")
 
@@ -234,6 +236,7 @@ def carwlLinks(request):
         if form.is_valid():
             links = form.cleaned_data['links']
             if not links.startswith("http"):
+                messages.warning(request,"The url is invalid")
                 logger.warning("Improper links")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
@@ -277,8 +280,11 @@ def carwlLinks(request):
                 jsonD = crawlDf.to_json()
                 generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
 
-                describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
-                
+                try:
+                    describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+                except KeyError:
+            
+                    return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),'json': jsonD})
                 status = crawlDf["status"].value_counts()
                 status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
                 status.reset_index(inplace=True)

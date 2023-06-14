@@ -21,6 +21,7 @@ from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis, Dataset
 from .utils import url_structure
 from .models import DatasetFile
 import pandas as pd
+from seo.tasks import generateReport, add
 
 
 
@@ -32,6 +33,7 @@ def analyseUrl(request):
             
             urls = form.cleaned_data['urls']
             urls = list(map(str.strip,urls.split("\n")))
+            # urls = [url for url in urls if url.startswith("http","www")]
 
             decode = form.cleaned_data['decode']
             
@@ -99,14 +101,22 @@ def overviewText(request):
             valid_text = form.cleaned_data['valid_text']
             valid_text = list(map(str.strip,valid_text.split("\n")))
             phrase_len = form.cleaned_data['phrase_len']
+
+            df = pd.DataFrame()
             if phrase_len:
                 df = word_frequency(valid_text,phrase_len=phrase_len,extra_info=True)
             else:
                 df = word_frequency(valid_text,extra_info=True)
-            # print(df)
+            if not df.empty:
+                generateReport.delay(df.to_json(),title="KText Overview profile")
+            messages.success(request, "text Overview generated")
+
             # df = pd.DataFrame.from_dict(df,orient='index')
             # df = df.transpose()
-            return render(request,'analyse/textan.html',{'form': form,'textDf': df.to_html(classes='table table-striped text-center', justify='center')})
+            # jsonD = df.to_json
+            return render(request,'analyse/textan.html',{'form': form,
+                                                        #  'json': jsonD,
+                                                         'textDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
         form = TextAnalysis()
