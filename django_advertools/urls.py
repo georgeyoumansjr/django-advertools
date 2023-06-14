@@ -23,7 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
 def index(request):
-    return render(request,"base.html")
+    return render(request,"home.html")
 
 def serveReport(request):
     return render(request,"reportMain.html")
