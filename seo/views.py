@@ -55,7 +55,8 @@ def robotsToDf(request,filters=None):
             
             df = robotstxt_to_df(urls)
             
-            message = generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            task_id = "robot_123"
+            generateReport.delay(task_id,df.to_json(),title="Robots.txt Data profile")
             
             unique = None
             
@@ -78,6 +79,7 @@ def robotsToDf(request,filters=None):
             
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
+                                                     'task_id':task_id,
                                                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                                                      'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 

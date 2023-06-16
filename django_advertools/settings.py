@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
+    'daphne',
     'celery',
     'channels',
     'django_filters',
@@ -91,7 +92,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_advertools.wsgi.application'
 
-ASGI_APPLICATION = 'django_advertools.asgi.application'
 
 
 
@@ -124,6 +124,7 @@ DATABASES = {
 #         }
 #     }
 # }
+ASGI_APPLICATION = 'django_advertools.asgi.application'
 
 # SELECT2_CACHE_BACKEND = "select2"
 
