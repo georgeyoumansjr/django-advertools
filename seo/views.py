@@ -46,8 +46,12 @@ def robotsToDf(request,filters=None):
             
             urls = form.cleaned_data['urls']
 
-            urls = list(map(str.strip,urls.split("\n")))
-            urls = [url for url in urls if url.startswith("http")]
+            urls = urls.strip()
+            # urls = list(map(str.strip,urls.split("\n")))
+            if not urls.startswith(("http","www")):
+                messages.warning(request,"Invalid URL type")
+            
+            # urls = [url for url in urls if url.startswith("http")]
             
             df = robotstxt_to_df(urls)
             

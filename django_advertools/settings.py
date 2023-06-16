@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'celery',
+    'channels',
     'django_filters',
     'django_select2',
     'generateAds.apps.GenerateadsConfig',
@@ -90,6 +91,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_advertools.wsgi.application'
 
+ASGI_APPLICATION = 'django_advertools.asgi.application'
 
 
 
