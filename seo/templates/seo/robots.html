@@ -55,17 +55,33 @@
 {% block javascript %}
 
 <script>
-    const taskId = "{{ task_id|safe }}";
-    console.log(taskId);
-    if(taskId){
-        const socket = new WebSocket(`ws://localhost:8000/ws/task/robot_123`);
+    // Replace <task_id> with the actual value
+    var task_id = "robot_123"; // Replace with the desired task ID
+
+    // Create the WebSocket connection
+    var socket = new WebSocket('ws://' + window.location.host + '/ws/task/' + task_id + '/');
+
+    // Event handler for successful connection
+    socket.onopen = function(event) {
+    console.log('WebSocket connection established');
     
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            const result = data.result;
-            console.log(result);
-        };
-    }
+    // You can perform any necessary actions after the connection is established
+    };
+
+    // Event handler for receiving messages
+    socket.onmessage = function(event) {
+    var message = event.data;
+    console.log('Received message:', message);
+    
+    // Handle the received message as needed
+    };
+
+    // Event handler for connection close
+    socket.onclose = function(event) {
+    console.log('WebSocket connection closed');
+    
+    // You can perform any necessary actions after the connection is closed
+    };
 
 
 </script>
