@@ -56,7 +56,8 @@ def robotsToDf(request,filters=None):
             df = robotstxt_to_df(urls)
             
             task_id = "robot_123"
-            generateReport.delay(task_id,df.to_json(),title="Robots.txt Data profile")
+            dynamic_title = "Robots.txt Data profile"
+            generateReport.delay(task_id,df.to_json(),False,dynamic_title)
             
             unique = None
             

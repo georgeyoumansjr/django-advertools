@@ -10,6 +10,13 @@ channel_layer = get_channel_layer()
 @shared_task
 def generateReport(task_id,df,minimal=False,title="Profile Report"):
     # messages.warning("Report generation on progress wait for completion")
+    async_to_sync(channel_layer.group_send)(
+            f'task_{task_id}',
+            {
+                'type': 'task_completed',
+                'result': 'Connection success'
+            }
+        )
     print(title +" "+ str(minimal))
     load_df = pd.read_json(df)
     try:
