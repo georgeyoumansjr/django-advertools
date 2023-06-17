@@ -72,9 +72,10 @@
 
         // Event handler for receiving messages
         socket.onmessage = function(event) {
-        var message = event.data;
-        console.log('Received message:', message);
-
+        var message = JSON.parse(event.data);
+            console.log(typeof message)
+            console.log('Received message:', message);
+            window.alert(message.result);
         // Handle the received message as needed
         };
 
