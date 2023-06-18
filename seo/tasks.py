@@ -3,6 +3,7 @@ import os
 from ydata_profiling import ProfileReport
 from django.contrib import messages
 import pandas as pd
+import advertools
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -32,6 +33,13 @@ def generateReport(task_id,df,minimal=False,title="Profile Report"):
         return "Report was not generated"
 
 
+
+
 @shared_task
 def add(a,b):
     return a+b
+
+
+@shared_task
+def serpCrawl():
+    pass

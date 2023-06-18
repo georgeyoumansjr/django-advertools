@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
-from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
+from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl
 
 from decouple import config
 # from advertools import SERP_GOOG_VALID_VALS
@@ -71,19 +71,13 @@ def robotsToDf(request,filters=None):
                     valid_urls.append(url)
                 else:
                     invalid_urls.append(url)
-                
-            
+
             urls = list(map(configRobots,valid_urls))
-            
-            
             df = robotstxt_to_df(urls)
-            
             task_id = "robot_123"
             dynamic_title = "Robots.txt Data profile"
             generateReport.delay(task_id,df.to_json(),False,dynamic_title)
-            
             unique = None
-            
             if "directive" in df:
                 unique_counts = df["directive"].value_counts()
                 
@@ -339,6 +333,58 @@ def carwlLinks(request):
 
 
 def serpCrawl(request):
-    pass
+    if request.method == 'POST':
+        form = SERPCrawl(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            query = list(map(str.strip,query.split(",")))
+            gl = form.cleaned_data['geolocation']
+            # print(gl)
+            # gl = list(map(str.strip,gl.split(",")))
+            country = form.cleaned_data['country']
+            language = form.cleaned_data['language']
+            rights = form.cleaned_data['rights']
+
+            # country = list(map(str.strip,country.split(","))) if country else None
+            # try:
+            if gl or country or language or rights:
+                params = {
+                    'q': query,
+                    'cx': config('CX'),
+                    'key': config('KEY'),
+                }
+                if gl:
+                    params['gl'] = gl
+                if country:
+                    params['cr'] = country
+                if language:
+                    params['lr'] = language
+                if rights:
+                    params['rights'] = rights
+                
+                serpDf = serp_goog(**params)
+            else:
+                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+        
+        
+            links = serpDf["link"].to_list()
+            crawlDf = crawl_headers(url_list=links,output_file="serp_crawl_output.jl")
+            print(crawlDf)
+
+            # except Exception as e:
+            #     print(e)
+            #     messages.warning(request,"Unable to make a query for invalid data")
+            #     return render(request, 'seo/serpCrawl.html',{'form': form})
+            
+           
+            return render(request,'seo/serpCrawl.html',{'form': form,
+                                                       'serpDf':serpDf.to_html(
+                classes='table table-striped text-center', justify='center'),
+            })
+
+    else:
+        # print(SERP_GOOG_VALID_VALS)
+        form = SERPCrawl()
+        return render(request, 'seo/serpCrawl.html',{'form': form})
 
 

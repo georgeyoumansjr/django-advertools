@@ -108,3 +108,13 @@ class Crawl(forms.Form):
     pg_count = forms.IntegerField(required=False, min_value=1,max_value=10000, help_text="max crawlable pages")
 
 
+class SERPCrawl(SerpGoogle):
+    limit = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter the limit'}),
+        help_text='Limit the number of urls you want to crawl'
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.layout[0].append('limit')
