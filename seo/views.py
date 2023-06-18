@@ -15,6 +15,8 @@ from django.contrib import messages
 from seo.tasks import generateReport, add
 import os,json
 import logging
+import validators
+
 logger = logging.getLogger(__name__)
 
 import pandas as pd
@@ -36,7 +38,20 @@ pd.set_option('display.max_colwidth', 30)
 #     #     print(e)
         # return False
 
+def isValidUrl(url):
+    return validators.url(url)
 
+
+
+def configRobots(url:str) -> str:
+
+    if not url.endswith(("/robots.txt","/robots.txt/")):
+        if url.endswith("/"):
+            url = url + "robots.txt"
+        else:
+            url = url + "/robots.txt"
+    
+    return url
 
 def robotsToDf(request,filters=None):
 
@@ -46,12 +61,20 @@ def robotsToDf(request,filters=None):
             
             urls = form.cleaned_data['urls']
 
-            urls = urls.strip()
-            # urls = list(map(str.strip,urls.split("\n")))
-            if not urls.startswith(("http","www")):
-                messages.warning(request,"Invalid URL type")
+            urls = urls.split("\n")
+
+            valid_urls = []
+            invalid_urls = []
+
+            for url in map(str.strip,urls):
+                if isValidUrl(url):
+                    valid_urls.append(url)
+                else:
+                    invalid_urls.append(url)
+                
             
-            # urls = [url for url in urls if url.startswith("http")]
+            urls = list(map(configRobots,valid_urls))
+            
             
             df = robotstxt_to_df(urls)
             
@@ -81,6 +104,7 @@ def robotsToDf(request,filters=None):
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
                                                      'task_id':task_id,
+                                                     "invalid_urls": invalid_urls,
                                                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                                                      'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
@@ -102,7 +126,7 @@ def sitemapToDf(request):
                 messages.warning(request,"The url was not able to convert to a dataframe")
                 return render(request,'seo/sitemap.html',{'form': form})
 
-            generateReport.delay(df.to_json(),title="Sitemap Data profile")
+            # generateReport.delay(df.to_json(),title="Sitemap Data profile")
 
             jsonD = df.to_json(orient="records")
 
@@ -180,7 +204,7 @@ def searchEngineResults(request):
                 messages.warning(request,"Unable to make a query for invalid data")
                 return render(request, 'seo/serpGoog.html',{'form': form})
             
-            generateReport.delay(serpDf.to_json(),title="SERP Data profile")
+            # generateReport.delay(serpDf.to_json(),title="SERP Data profile")
 
             
             domains_df = serpDf['displayLink'].value_counts()
@@ -225,7 +249,7 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
-            generateReport.delay(knowDf.to_json(),title="Knowledge Graph Data profile")
+            # generateReport.delay(knowDf.to_json(),title="Knowledge Graph Data profile")
 
             jsonD = knowDf.to_json(orient="records")
             
@@ -285,7 +309,7 @@ def carwlLinks(request):
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
                 jsonD = crawlDf.to_json()
-                generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
+                # generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
 
                 try:
                     describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
@@ -311,4 +335,10 @@ def carwlLinks(request):
             os.remove('crawl_output.jl')
         form = Crawl()
         return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
+
+
+
+def serpCrawl(request):
+    pass
+
 
