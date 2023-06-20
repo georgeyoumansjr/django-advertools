@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
+from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers, crawllogs_to_df
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl
 
 from decouple import config
@@ -12,7 +12,7 @@ from decouple import config
 # from ydata_profiling import ProfileReport
 from django.contrib import messages
 # from celery.result import AsyncResult
-from seo.tasks import generateReport, add
+from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders
 import os,json
 import logging
 import validators
@@ -272,19 +272,30 @@ def carwlLinks(request):
             try:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
+                if os.path.exists('output_file.log'):
+                    os.remove('output_file.log')
             except PermissionError:
                 messages.warning(request,"Somebody Else is using this service")
                 return HttpResponseRedirect("home")
 
             if headers_only:
                 
-                crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl")
+                crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl",
+                                        custom_settings={
+                        # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+                        'CLOSESPIDER_PAGECOUNT': int(form.cleaned_data['pg_count']) if form.cleaned_data['pg_count'] else 100 ,
+                        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                        'LOG_FILE': 'output_file.log',
+                    })
 
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
             else:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
+                
+                if os.path.exists('output_file.log'):
+                    os.remove('output_file.log')
                 crawlDf = crawl(
                     url_list=links,output_file="crawl_output.jl",follow_links=follow_links,
 
@@ -298,12 +309,18 @@ def carwlLinks(request):
                 
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
+            logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+            logsDf = logsDf.reset_index(drop=True).to_html(classes='table', justify='center')
+        
+            logsDf = logsDf.replace('class="dataframe table"','class="table table-primary table-striped text-center"')
+            
             if crawlDf.empty:
                 messages.warning(request,"Empty columns observed this url may not be crawlable")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
                 jsonD = crawlDf.to_json()
                 # generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
+
 
                 try:
                     describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
@@ -320,6 +337,7 @@ def carwlLinks(request):
                 return render(request,'seo/crawl.html',{'form': form,
                                                         'describe': describe.to_dict(),
                                                         'statusJ': status.to_json(),
+                                                        'logsDf': logsDf,
                                                         'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
                                                         'json': jsonD,
                                                         'overview':overview})
@@ -366,16 +384,12 @@ def serpCrawl(request):
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
         
-        
-            links = serpDf["link"].to_list()
-            crawlDf = crawl_headers(url_list=links,output_file="serp_crawl_output.jl")
-            print(crawlDf)
 
-            # except Exception as e:
-            #     print(e)
-            #     messages.warning(request,"Unable to make a query for invalid data")
-            #     return render(request, 'seo/serpCrawl.html',{'form': form})
+            links = serpDf["link"].to_list()
+            print(links)
+            crawlDf = crawl_headers(url_list=links,output_file="serp_crawl_output.jl")
             
+
            
             return render(request,'seo/serpCrawl.html',{'form': form,
                                                        'serpDf':serpDf.to_html(

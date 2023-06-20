@@ -16,13 +16,13 @@ app.config_from_object('django.conf:settings',
 					namespace='CELERY')
 
 # celery.py (or wherever you configure Celery)
-app.conf.beat_schedule = {
-    'flower-stats': {
-        'task': 'flower.commands.stats',
-        'schedule': timedelta(seconds=5),
-        'options': {'queue': 'flower'},
-    },
-}
+# app.conf.beat_schedule = {
+#     'flower-stats': {
+#         'task': 'flower.commands.stats',
+#         'schedule': timedelta(seconds=5),
+#         'options': {'queue': 'flower'},
+#     },
+# }
 
 
 # Load task modules from all registered Django app configs.

@@ -3,7 +3,7 @@ import os
 from ydata_profiling import ProfileReport
 from django.contrib import messages
 import pandas as pd
-import advertools
+from advertools import crawl_headers, crawl
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -41,5 +41,27 @@ def add(a,b):
 
 
 @shared_task
-def serpCrawl():
+def serpCrawlHeaders(links:list):
+    try:
+        if os.path.exists('serp_crawl_headers_output.jl'):
+            os.remove('serp_crawl_headers_output.jl')
+    except PermissionError:
+        return False
+    
+    crawl_headers(url_list=links,output_file="serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'headerCrawl.log'})
+    return True
+    
+@shared_task
+def serpCrawlFull(links:list):
+    try:
+        if os.path.exists('serp_crawl_output.jl'):
+            os.remove('serp_crawl_output.jl')
+    except PermissionError:
+        return False
+    
+    crawl(url_list=links,output_file="serp_crawl_output.jl",custom_settings={'LOG_FILE': 'fullCrawl.log'})
+    return True
+
+@shared_task
+def serpReadDf(type:str):
     pass
