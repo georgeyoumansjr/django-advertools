@@ -120,4 +120,5 @@ class SERPCrawl(SerpGoogle):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.helper.layout[0].append('limit')
+        self.helper.layout[1].append('limit')
+        self.helper.layout[1].append('headers_only')

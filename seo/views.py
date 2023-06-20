@@ -254,6 +254,15 @@ def knowledgeGraph(request):
         return render(request, 'seo/knowledgeG.html',{'form': form})
 
 
+
+def analyzeCrawlLogs(logsDf):
+    
+    logsDescribe = logsDf.message.value_counts()
+
+
+
+
+
 def carwlLinks(request):
     overview = False
     if request.method == 'POST':
@@ -310,16 +319,21 @@ def carwlLinks(request):
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
             logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+
+
             logsDf = logsDf.reset_index(drop=True).to_html(classes='table', justify='center')
         
             logsDf = logsDf.replace('class="dataframe table"','class="table table-primary table-striped text-center"')
-            
+            # print(logsDescribe)
             if crawlDf.empty:
                 messages.warning(request,"Empty columns observed this url may not be crawlable")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
                 jsonD = crawlDf.to_json()
-                # generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
+
+                task_id = "crawlD_123"
+                dynamic_title = "Crawl Data profile"
+                generateReport.delay(task_id,jsonD,True,dynamic_title)
 
 
                 try:
@@ -338,6 +352,7 @@ def carwlLinks(request):
                                                         'describe': describe.to_dict(),
                                                         'statusJ': status.to_json(),
                                                         'logsDf': logsDf,
+                                                        
                                                         'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
                                                         'json': jsonD,
                                                         'overview':overview})
@@ -362,6 +377,8 @@ def serpCrawl(request):
             country = form.cleaned_data['country']
             language = form.cleaned_data['language']
             rights = form.cleaned_data['rights']
+            limit = form.cleaned_data['limit']
+            headers_only = form.cleaned_data['headers_only']
 
             # country = list(map(str.strip,country.split(","))) if country else None
             # try:
@@ -386,11 +403,13 @@ def serpCrawl(request):
         
 
             links = serpDf["link"].to_list()
-            print(links)
-            crawlDf = crawl_headers(url_list=links,output_file="serp_crawl_output.jl")
             
-
-           
+            
+            if headers_only:
+                serpCrawlHeaders.delay(links)
+            else:
+                serpCrawlFull.delay(links)
+            
             return render(request,'seo/serpCrawl.html',{'form': form,
                                                        'serpDf':serpDf.to_html(
                 classes='table table-striped text-center', justify='center'),

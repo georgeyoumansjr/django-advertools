@@ -42,6 +42,9 @@ def add(a,b):
 
 @shared_task
 def serpCrawlHeaders(links:list):
+    # print(links)
+    links = list(links)
+    # print(links)
     try:
         if os.path.exists('serp_crawl_headers_output.jl'):
             os.remove('serp_crawl_headers_output.jl')
