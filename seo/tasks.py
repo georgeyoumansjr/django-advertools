@@ -52,6 +52,7 @@ def serpCrawlHeaders(links:list):
         return False
     
     crawl_headers(url_list=links,output_file="serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'headerCrawl.log'})
+    
     return True
     
 @shared_task
@@ -67,4 +68,12 @@ def serpCrawlFull(links:list):
 
 @shared_task
 def serpReadDf(type:str):
-    pass
+    if type == "headers":
+        df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    else:
+        df = pd.read_json('serp_crawl_output.jl', lines=True)
+    
+    
+
+
+

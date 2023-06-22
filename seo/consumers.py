@@ -3,8 +3,8 @@ import json
 
 class TaskCompletionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.task_id = self.scope['url_route']['kwargs']['task_id']
-        self.task_group_name = f'task_{self.task_id}'
+        self.random_id = self.scope['url_route']['kwargs']['random_id']
+        self.task_group_name = f'task_{self.random_id}'
 
         # Join task group
         await self.channel_layer.group_add(
