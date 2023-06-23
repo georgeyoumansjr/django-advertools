@@ -65,3 +65,11 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'result': "Unable to create report"
         }))
+    
+    # async def crawlComplete(self, event):
+    #     result = event['result']
+
+    #     # Send task completion notification to the client
+    #     await self.send(text_data=json.dumps({
+    #         'result': "Crawling Completed"
+    #     }))

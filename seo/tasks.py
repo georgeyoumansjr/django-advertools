@@ -13,6 +13,8 @@ channel_layer = get_channel_layer()
 @shared_task
 def generateReport(group_id,df,minimal=False,title="Profile Report"):
    
+    task_id = generateReport.request.id
+    print("taks id in generateReport " + task_id)
     load_df = pd.read_json(df)
     
     # try:

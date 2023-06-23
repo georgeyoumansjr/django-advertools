@@ -85,7 +85,8 @@ def robotsToDf(request, filters=None):
             df = robotstxt_to_df(urls)
             task_id = "test"
             dynamic_title = "Robots.txt Data profile"
-            generateReport.delay(task_id, df.to_json(), False, dynamic_title)
+            task_id = generateReport.delay(task_id, df.to_json(), False, dynamic_title)
+            # print("Task id in robots.txt "+ task_id.id)
             unique = None
             if "directive" in df:
                 unique_counts = df["directive"].value_counts()
@@ -113,6 +114,7 @@ def robotsToDf(request, filters=None):
                     "form": form,
                     "json": unique,
                     "invalid_urls": invalid_urls,
+                    "task_id": task_id.id,
                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                     "roboDf": df.to_html(
                         classes="table table-striped text-center", justify="center"
@@ -501,9 +503,9 @@ def serpCrawl(request):
             links = serpDf["link"].to_list()
 
             if headers_only:
-                serpCrawlHeaders.delay("test", links)
+                task_id = serpCrawlHeaders.delay("test", links)
             else:
-                serpCrawlFull.delay("test", links)
+                task_id = serpCrawlFull.delay("test", links)
             
 
 
@@ -515,6 +517,7 @@ def serpCrawl(request):
                     "serpDf": serpDf.to_html(
                         classes="table table-striped text-center", justify="center"
                     ),
+                    "task_id": task_id
                 },
             )
 
