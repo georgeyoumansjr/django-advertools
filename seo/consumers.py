@@ -29,6 +29,7 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
+            'type':'task_completed',
             'result': result
         }))
     
@@ -37,6 +38,7 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
+            'type':'task_started',
             'start': start
         }))
 
@@ -54,4 +56,12 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
             'result': "Unable to process the dataset"
+        }))
+    
+    async def report_failed(self, event):
+        # result = event['result']
+
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({
+            'result': "Unable to create report"
         }))

@@ -19,6 +19,7 @@ if (random_id) {
     // Event handler for receiving messages
     socket.onmessage = function (event) {
         var message = JSON.parse(event.data);
+        console.log(message)
         console.log(typeof message)
         console.log('Received message:', message);
         if (message.type != "data_converted") {
@@ -35,6 +36,7 @@ if (random_id) {
         // You can perform any necessary actions after the connection is closed
     };
 }
+
 
 
 
