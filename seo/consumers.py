@@ -47,6 +47,7 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
+            'type':'data_converted',
             'result': result
         }))
     
@@ -55,6 +56,7 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
+            'type':'conversion_failed',
             'result': "Unable to process the dataset"
         }))
     
@@ -63,13 +65,16 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
+            'type':'report_failed',
             'result': "Unable to create report"
         }))
     
-    # async def crawlComplete(self, event):
-    #     result = event['result']
+    async def crawlRead(self, event):
+        task_id = event['task_id']
 
-    #     # Send task completion notification to the client
-    #     await self.send(text_data=json.dumps({
-    #         'result': "Crawling Completed"
-    #     }))
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({
+            'type':'crawlRead',
+            'result': "Read crawled file",
+            'task_id': task_id
+        }))

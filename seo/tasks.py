@@ -86,15 +86,18 @@ def serpCrawlHeaders(group_id,links:list):
             }
         )
     serpReadDf.delay(group_id,"headers")
-    # df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
-    # async_to_sync(channel_layer.group_send)(
-    #         "group_"+group_id,
-    #         {
-    #             'type': 'task_completed',
-    #             'result': df.to_json(orient="records")
-    #         }
-    #     )
-    return True
+    df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'task_completed',
+                'result': 'headers crawled'
+            }
+        )
+    return {
+        "status":"completed",
+        "result": df.to_json(orient="records")
+    }
     
 @shared_task
 def serpCrawlFull(group_id,links:list):
@@ -104,6 +107,8 @@ def serpCrawlFull(group_id,links:list):
     except PermissionError:
         return False
     
+    task_id = serpCrawlFull.request.id
+    
     crawl(url_list=links,output_file="serp_crawl_output.jl",custom_settings={'LOG_FILE': 'fullCrawl.log'})
     async_to_sync(channel_layer.group_send)(
             "group_"+group_id,
@@ -112,7 +117,19 @@ def serpCrawlFull(group_id,links:list):
                 'result': 'full crawled'
             }
         )
-    return True
+    df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+
+    async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'crawlRead',
+                'task_id': task_id
+            }
+        )
+    return {
+        "status":"completed",
+        "result": df.to_json(orient="records")
+    }
 
 @shared_task
 def serpReadDf(group_id,type:str):

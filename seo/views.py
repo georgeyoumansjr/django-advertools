@@ -517,7 +517,7 @@ def serpCrawl(request):
                     "serpDf": serpDf.to_html(
                         classes="table table-striped text-center", justify="center"
                     ),
-                    "task_id": task_id
+                    "task_id": task_id.id
                 },
             )
 

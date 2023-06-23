@@ -26,6 +26,23 @@ if (random_id) {
             window.alert(message.result);
         }
 
+        if (message.type == 'crawlRead'){
+            console.log("Crawl Read")
+            console.log(message.task_id)
+            var url = "/api/result/"+message.task_id+"/";
+            console.log(url);
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.status);  // Output: Hello, world!
+                const element = document.getElementById('test');
+                element.textContent = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
         // Handle the received message as needed
     };
 
