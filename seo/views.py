@@ -342,10 +342,11 @@ def analyzeCrawlLogs():
     
     
     return {
+
         'logs_message': logs_m,
         'logs_status': logs_s,
         'logs_mi': logs_mi,
-        'logs_dt': logsDf 
+        'logsDf': logsDf 
     }
 
 def carwlLinks(request):
@@ -400,7 +401,7 @@ def carwlLinks(request):
 
                 crawlDf = pd.read_json("crawl_output.jl", lines=True)
 
-            
+            logsAnalysis = analyzeCrawlLogs()
             
             if crawlDf.empty:
                 messages.warning(
@@ -427,6 +428,7 @@ def carwlLinks(request):
                         request,
                         "seo/crawl.html",
                         {
+                            **logsAnalysis,
                             "form": form,
                             "crawlDf": crawlDf.to_html(
                                 classes="table table-striped", justify="center"
@@ -447,10 +449,10 @@ def carwlLinks(request):
                     request,
                     "seo/crawl.html",
                     {
+                        **logsAnalysis,
                         "form": form,
                         "describe": describe.to_dict(),
                         "statusJ": status.to_json(),
-                        
                         "crawlDf": crawlDf.to_html(
                             classes="table table-striped", justify="center"
                         ),
