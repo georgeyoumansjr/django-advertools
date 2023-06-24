@@ -325,7 +325,7 @@ def analyzeCrawlLogs():
 from .utils import delete_existing_files
 
 def analyzeCrawlLogs():
-    logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+    logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/output_file.log")
 
     logs_m = logsDf["message"].value_counts().to_json()
     logs_s = logsDf["status"].value_counts().to_json()
@@ -378,28 +378,28 @@ def carwlLinks(request):
                         if form.cleaned_data["pg_count"]
                         else 100,
                         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                        "LOG_FILE": "output_file.log",
+                        "LOG_FILE": "logs/crawlLogs/output_file.log",
                     }
 
             if headers_only:
                 crawlDf = crawl_headers(
                     url_list=links,
-                    output_file="crawl_output.jl",
+                    output_file="output/crawl_output.jl",
                     custom_settings=custom_settings,
                 )
 
-                crawlDf = pd.read_json("crawl_output.jl", lines=True)
+                crawlDf = pd.read_json("output/crawl_output.jl", lines=True)
 
             else:
                 delete_existing_files()
                 crawlDf = crawl(
                     url_list=links,
-                    output_file="crawl_output.jl",
+                    output_file="output/crawl_output.jl",
                     follow_links=follow_links,
                     custom_settings=custom_settings
                 )
 
-                crawlDf = pd.read_json("crawl_output.jl", lines=True)
+                crawlDf = pd.read_json("output/crawl_output.jl", lines=True)
 
             logsAnalysis = analyzeCrawlLogs()
             
@@ -462,8 +462,8 @@ def carwlLinks(request):
                 )
 
     else:
-        if os.path.exists("crawl_output.jl"):
-            os.remove("crawl_output.jl")
+        if os.path.exists("output/crawl_output.jl"):
+            os.remove("output/crawl_output.jl")
         form = Crawl()
         return render(request, "seo/crawl.html", {"form": form, "overview": overview})
 

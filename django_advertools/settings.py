@@ -146,12 +146,12 @@ LOGGING = {
         },
         'channels': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Set the desired log level for the 'channels' logger
+            'level': 'INFO',  # Set the desired log level for the 'channels' logger
             'propagate': False,
         },
         'asgi': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # Set the desired log level for the 'asgi' logger
+            'level': 'INFO',  # Set the desired log level for the 'asgi' logger
             'propagate': False,
         },
     },
