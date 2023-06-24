@@ -138,6 +138,10 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/main.log'),  # Replace 'debug.log' with your desired file name
+        },
     },
     'loggers': {
         'django': {
