@@ -74,6 +74,19 @@
         text-overflow: initial;
         cursor: pointer;
       }
+      .expandable-cell {
+        position: relative;
+      }
+
+      .expandable-cell .expandable-content {
+        max-height: 1.5em; /* Adjust as needed */
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+
+      .expandable-cell.expanded .expandable-content {
+        max-height: none;
+      }
     </style>
   </head>
   <body>
@@ -214,12 +227,16 @@
     <script>
       // var dTable;
       $(document).ready(function () {
-        $(".dataframe thead tr").each(function () {
-          $(this).clone(true).addClass("filters").appendTo(".dataframe thead");
-        });
+        $(".dataframe").each(function () {
+          var table = $(this);
 
-        var dTable = $(".dataframe").each(function () {
-          $(this).DataTable({
+          table
+            .find("thead tr")
+            .clone(true)
+            .addClass("filters")
+            .appendTo(table.find("thead"));
+
+          var dTable = table.DataTable({
             colReorder: true,
             dom: "Bfrtip",
             columnDefs: [
@@ -227,8 +244,22 @@
                 targets: 1,
                 className: "noVis",
               },
+              {
+                targets: "_all",
+                render: function (data, type, row) {
+                  if (type === "display" && data.length > 30) {
+                    // Customize the threshold as needed
+                    return (
+                      '<div class="expandable-cell"><div class="expandable-content">' +
+                      data +
+                      "</div></div>"
+                    );
+                  } else {
+                    return data;
+                  }
+                },
+              },
             ],
-
             buttons: [
               {
                 extend: "colvis",
@@ -244,12 +275,10 @@
             initComplete: function () {
               var api = this.api();
 
-              // For each column
               api
                 .columns()
                 .eq(0)
                 .each(function (colIdx) {
-                  // Set the header cell to contain the input element
                   var cell = $(".filters th").eq(
                     $(api.column(colIdx).header()).index()
                   );
@@ -258,33 +287,29 @@
                     '<input type="text" placeholder="' + title + '" />'
                   );
 
-                  // On every keypress in this input
                   $(
                     "input",
                     $(".filters th").eq($(api.column(colIdx).header()).index())
                   )
                     .off("keyup change")
                     .on("change", function (e) {
-                      // Get the search value
                       $(this).attr("title", $(this).val());
-                      var regexr = "({search})"; //$(this).parents('th').find('select').val();
-
+                      var regexr = "({search})";
                       var cursorPosition = this.selectionStart;
-                      // Search the column for that value
+
                       api
                         .column(colIdx)
                         .search(
-                          this.value != ""
+                          this.value !== ""
                             ? regexr.replace(
                                 "{search}",
                                 "(((" + this.value + ")))"
                               )
                             : "",
-                          this.value != "",
-                          this.value == ""
+                          this.value !== "",
+                          this.value === ""
                         )
                         .draw();
-                      console.log(this.value);
                     })
                     .on("keyup", function (e) {
                       e.stopPropagation();
@@ -297,17 +322,14 @@
                 });
             },
           });
-        });
 
-        $(".dataframe tbody").on("click", "td", function () {
-          if ($(this).hasClass("expand")) {
-            $(this).removeClass("expand");
-          } else {
-            $(this).addClass("expand");
-          }
+          table.find("tbody").on("click", "td .expandable-cell", function () {
+            $(this).toggleClass("expanded");
+          });
         });
       });
     </script>
+
     {% block javascript %} {% endblock javascript %}
   </body>
 </html>
