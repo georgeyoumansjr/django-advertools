@@ -600,6 +600,7 @@ def serpCrawl(request):
             domains_df.columns = ["displayLink", "frequency", "percentage"]
 
             rank_df = serpDf[["searchTerms", "displayLink", "rank", "link"]].head(10)
+            
 
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(

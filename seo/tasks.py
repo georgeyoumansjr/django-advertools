@@ -78,6 +78,11 @@ def serpCrawlHeaders(group_id, links: list):
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
     analyzeCrawlLogs.delay(group_id, "headers")
+
+    # listCol = df[df["body_text"].notna()]
+    # listCol = listCol["body_text"].to_list()
+    # analysis.delay(group_id,listCol)
+
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
     )
@@ -108,9 +113,14 @@ def serpCrawlFull(group_id, links: list):
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
-    df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
+    df = pd.read_json("output/serp_crawl_output.jl", lines=True)
     task_idr = analyzeCrawlLogs.delay(group_id, "full")
-    print("main id" + task_idr.id)
+    # print("main id" + task_idr.id)
+
+    # print(df)
+    listCol = df[df["body_text"].notna()]
+    listCol = listCol["body_text"].to_list()
+    analysis.delay(group_id,listCol)
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
@@ -183,8 +193,8 @@ def analyzeCrawlLogs(group_id, type):
 @shared_task
 def analysis(group_id, content: list):
     task_id = analysis.request.id
-    # print("Analyze Content")
-    # print(task_id)
+    print("Analyze Content")
+    print(task_id)
     # try:
     listCol = list(content)
     urls = extract_urls(listCol)

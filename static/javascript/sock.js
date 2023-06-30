@@ -163,7 +163,7 @@ if (random_id) {
     }
     // console.log("Received message:", message);
 
-    if (message.type === "analysisComplete") {
+    if (message.type === "analysisComplete" && message.task_name === "crawlLogs") {
       console.log("Analysis complete");
       console.log(message.task_id);
       var url = "/api/analysis/" + message.task_id + "/";
@@ -191,6 +191,26 @@ if (random_id) {
           const element = document.getElementById("analysisResp");
           element.innerHTML = data.result.logs_dt;
           applyDataTablesFormatting(element);
+          // initializeDatatables();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
+
+    if (message.type === "analysisComplete" && message.task_name === "contentAnalysis") {
+      console.log("Analysis complete");
+      console.log(message.task_id);
+      var url = "/api/analysis/" + message.task_id + "/";
+      console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          console.log(data);
+          // const content = JSON.parse(data);
+
           // initializeDatatables();
         })
         .catch((error) => {
