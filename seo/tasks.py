@@ -4,7 +4,17 @@ from ydata_profiling import ProfileReport
 from django.core.cache import cache
 
 import pandas as pd
-from advertools import crawl_headers, crawl, crawllogs_to_df
+from advertools import (
+    crawl_headers,
+    crawl,
+    crawllogs_to_df,
+    extract_intense_words,
+    extract_hashtags,
+    extract_mentions,
+    extract_numbers,
+    extract_questions,
+    extract_urls,
+)
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import json
@@ -168,3 +178,48 @@ def analyzeCrawlLogs(group_id, type):
             "logs_dt": logsDf,
         },
     }
+
+
+@shared_task
+def analysis(group_id, content: list):
+    task_id = analysis.request.id
+    # print("Analyze Content")
+    # print(task_id)
+    # try:
+    listCol = list(content)
+    urls = extract_urls(listCol)
+
+    mentions = extract_mentions(listCol)
+
+    questions = extract_questions(listCol)
+
+    numbers = extract_numbers(listCol)
+
+    hashtags = extract_hashtags(listCol)
+
+    intense_words = extract_intense_words(
+        listCol, min_reps=3
+    )  # minimum repertition of words 3
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": "contentAnalysis"},
+    )
+    return {
+        "status":"completed",
+        "result":{
+            "urls": urls,
+            "mentions": mentions,
+            "questions": questions,
+            "numbers": numbers,
+            "hashtags": hashtags,
+            "intense_words": intense_words,
+        }
+    }
+    # except Exception as e:
+    #     return {
+    #         "status":"failed",
+    #         "result": {
+    #             "message": e
+    #         }
+    #     }

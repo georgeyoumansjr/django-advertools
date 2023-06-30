@@ -395,6 +395,7 @@ def analyzeCrawlLogs():
 
 def carwlLinks(request):
     overview = False
+    analysis = False
     if request.method == "POST":
         form = Crawl(request.POST)
         if form.is_valid():
@@ -466,6 +467,8 @@ def carwlLinks(request):
                         .describe()
                         .loc[["mean", "max", "min"]]
                     )
+                    print(describe)
+                    # describe = describe.to_dict()
                 except KeyError:
                     return render(
                         request,
@@ -479,30 +482,68 @@ def carwlLinks(request):
                             "json": jsonD,
                         },
                     )
-                status = crawlDf["status"].value_counts()
-                status = pd.DataFrame(
-                    {"frequency": status, "percentage": status / len(crawlDf) * 100}
-                )
-                status.reset_index(inplace=True)
-                status.columns = ["status", "frequency", "percentage"]
 
                 overview = True
+                
+                try:
+                    listCol = crawlDf[crawlDf["body_text"].notna()]
 
-                return render(
-                    request,
-                    "seo/crawl.html",
-                    {
-                        **logsAnalysis,
-                        "form": form,
-                        "describe": describe.to_dict(),
-                        "statusJ": status.to_json(),
-                        "crawlDf": crawlDf.to_html(
-                            classes="table table-striped", justify="center"
-                        ),
-                        "json": jsonD,
-                        "overview": overview,
-                    },
-                )
+                    listCol = listCol["body_text"].to_list()
+                    urls = extract_urls(listCol)
+
+                    mentions = extract_mentions(listCol)
+
+                    questions = extract_questions(listCol)
+
+                    numbers = extract_numbers(listCol)
+
+                    hashtags = extract_hashtags(listCol)
+
+                    intense_words = extract_intense_words(
+                        listCol, min_reps=3
+                    )  # minimum repertition of words 3
+
+                    analysis = True
+
+                    
+                    return render(
+                        request,
+                        "seo/crawl.html",
+                        {
+                            **logsAnalysis,
+                            "form": form,
+                            "describe": describe.to_dict(),
+                            "urls": urls,
+                            "mentions": mentions,
+                            "questions": questions,
+                            "numbers": numbers,
+                            "hashtags": hashtags,
+                            "intense_words": intense_words,
+                            "crawlDf": crawlDf.to_html(
+                                classes="table table-striped", justify="center"
+                            ),
+                            "analysis":analysis,
+                            "json": jsonD,
+                            "overview": overview,
+                        },
+                    )
+                except Exception as e:
+                    messages.warning(request, e)
+                    return render(
+                        request,
+                        "seo/crawl.html",
+                        {
+                            **logsAnalysis,
+                            "form": form,
+                            "describe": describe.to_dict(),
+                            # "statusJ": status.to_json(),
+                            "crawlDf": crawlDf.to_html(
+                                classes="table table-striped", justify="center"
+                            ),
+                            "json": jsonD,
+                            "overview": overview,
+                        },
+                    )
 
     else:
         if os.path.exists("output/crawl_output.jl"):
