@@ -120,7 +120,7 @@ def serpCrawlFull(group_id, links: list):
     # print(df)
     listCol = df[df["body_text"].notna()]
     listCol = listCol["body_text"].to_list()
-    analysis.delay(group_id,listCol)
+    analyzeContent.delay(group_id,listCol,"Body Content Analysis")
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
@@ -191,8 +191,8 @@ def analyzeCrawlLogs(group_id, type):
 
 
 @shared_task
-def analysis(group_id, content: list):
-    task_id = analysis.request.id
+def analyzeContent(group_id, content: list,title="Overview Analysis"):
+    task_id = analyzeContent.request.id
     print("Analyze Content")
     print(task_id)
     # try:
@@ -218,6 +218,7 @@ def analysis(group_id, content: list):
     return {
         "status":"completed",
         "result":{
+            "title":title,
             "urls": urls,
             "mentions": mentions,
             "questions": questions,

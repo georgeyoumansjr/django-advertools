@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import (
     robotstxt_to_df,
@@ -28,7 +28,7 @@ from decouple import config
 from django.contrib import messages
 
 # from celery.result import AsyncResult
-from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders
+from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders, analyzeContent
 import os, json
 import logging
 import validators
@@ -485,65 +485,31 @@ def carwlLinks(request):
 
                 overview = True
                 
-                try:
-                    listCol = crawlDf[crawlDf["body_text"].notna()]
+               
+                listCol = crawlDf[crawlDf["body_text"].notna()]
 
-                    listCol = listCol["body_text"].to_list()
-                    urls = extract_urls(listCol)
+                listCol = listCol["body_text"].to_list()
 
-                    mentions = extract_mentions(listCol)
-
-                    questions = extract_questions(listCol)
-
-                    numbers = extract_numbers(listCol)
-
-                    hashtags = extract_hashtags(listCol)
-
-                    intense_words = extract_intense_words(
-                        listCol, min_reps=3
-                    )  # minimum repertition of words 3
-
-                    analysis = True
+                analyzeContent.delay(task_id,listCol,"Crawl Body Response Analysis")
+                
+                analysis = True
 
                     
-                    return render(
-                        request,
-                        "seo/crawl.html",
-                        {
-                            **logsAnalysis,
-                            "form": form,
-                            "describe": describe.to_dict(),
-                            "urls": urls,
-                            "mentions": mentions,
-                            "questions": questions,
-                            "numbers": numbers,
-                            "hashtags": hashtags,
-                            "intense_words": intense_words,
-                            "crawlDf": crawlDf.to_html(
-                                classes="table table-striped", justify="center"
-                            ),
-                            "analysis":analysis,
-                            "json": jsonD,
-                            "overview": overview,
-                        },
-                    )
-                except Exception as e:
-                    messages.warning(request, e)
-                    return render(
-                        request,
-                        "seo/crawl.html",
-                        {
-                            **logsAnalysis,
-                            "form": form,
-                            "describe": describe.to_dict(),
-                            # "statusJ": status.to_json(),
-                            "crawlDf": crawlDf.to_html(
-                                classes="table table-striped", justify="center"
-                            ),
-                            "json": jsonD,
-                            "overview": overview,
-                        },
-                    )
+                return render(
+                    request,
+                    "seo/crawl.html",
+                    {
+                        **logsAnalysis,
+                        "form": form,
+                        "describe": describe.to_dict(),
+                        "crawlDf": crawlDf.to_html(
+                            classes="table table-striped", justify="center"
+                        ),
+                        "analysis":analysis,
+                        "json": jsonD,
+                        "overview": overview,
+                    },
+                )
 
     else:
         if os.path.exists("output/crawl_output.jl"):
@@ -600,7 +566,7 @@ def serpCrawl(request):
             domains_df.columns = ["displayLink", "frequency", "percentage"]
 
             rank_df = serpDf[["searchTerms", "displayLink", "rank", "link"]].head(10)
-            
+
 
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(
