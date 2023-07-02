@@ -469,12 +469,16 @@ def carwlLinks(request):
                     )
                     print(describe)
                     # describe = describe.to_dict()
+
+
                 except KeyError:
+                    analysis=True
                     return render(
                         request,
                         "seo/crawl.html",
                         {
                             **logsAnalysis,
+                            'analysis':analysis,
                             "form": form,
                             "crawlDf": crawlDf.to_html(
                                 classes="table table-striped", justify="center"
