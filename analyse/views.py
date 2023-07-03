@@ -217,7 +217,7 @@ def dataSetAnalysis(request):
             df.dropna(subset=[column_name], inplace=True)
             # listCol = df[df[column_name].notna()]
             listCol = df[column_name].to_list()
-            print(listCol)
+            # print(listCol)
 
             urls = extract_urls(listCol)
             mentions = extract_mentions(listCol)
