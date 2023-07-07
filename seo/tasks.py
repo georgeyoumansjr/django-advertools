@@ -266,61 +266,81 @@ def get_keywords(group_id,body_text):
 
 
 @shared_task
-def titleAnalysis(title = None):
+def titleAnalysis(group_id,title = None):
+    task_id = titleAnalysis.request.id
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
+    )
     if title:
         lengthT = len(title)
         if lengthT > 50 and lengthT < 70:
             return {
                 "status": "success",
-                "title": title,
-                "length": lengthT,
-                "appropriate": True,
-                "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long."
+                "result": {
+                    "title": title,
+                    "length": lengthT,
+                    "appropriate": True,
+                    "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long."
+                }
             }
         else:
             return {
                 "status": "success",
-                "title": title,
-                "length": lengthT,
-                "appropriate": False,
-                "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long."
+                "result": {
+                    "title": title,
+                    "length": lengthT,
+                    "appropriate": False,
+                    "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long."
+                }
             }
     else:
         return {
                 "status": "failed",
-                "title": title,
-                "length": None,
-                "appropriate": False,
-                "description": f"The title is not set and title length which must be approx. 50-70 chars long."
+                "result":{
+                    "title": title,
+                    "length": None,
+                    "appropriate": False,
+                    "description": f"The title is not set and title length which must be approx. 50-70 chars long."
+                }
             }
 
 @shared_task
-def metaDescripton(description):
+def metaDescripton(group_id,description):
+    task_id = metaDescripton.request.id
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"metaDescripton"}
+    )
     if description:
         lengthT = len(description)
         if lengthT > 150 and lengthT < 170:
             return {
                 "status": "success",
-                "description": description,
-                "length": lengthT,
-                "appropriate": True,
-                "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long."
+                "result":{
+                    "description_meta": description,
+                    "length": lengthT,
+                    "appropriate": True,
+                    "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long."
+                }
             }
         else:
             return {
                 "status": "success",
-                "description": description,
-                "length": lengthT,
-                "appropriate": False,
-                "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long."
+                "result":{
+                    "description_meta": description,
+                    "length": lengthT,
+                    "appropriate": False,
+                    "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long."
+                }
             }
     else:
         return {
                 "status": "failed",
-                "description": description,
-                "length": None,
-                "appropriate": False,
-                "description": f"The description is not set and description length which must be approx. 150-170 chars long."
+                "result": {
+                    "description_meta": description,
+                    "length": None,
+                    "appropriate": False,
+                    "description": f"The description is not set and description length which must be approx. 150-170 chars long."
+                }
             }
 
 @shared_task
@@ -344,4 +364,7 @@ def runCrawler(group_id,url):
     
     body_text = crawlDf["body_text"][0]
     get_keywords.delay(group_id,body_text)
+
+    titleAnalysis.delay(group_id,crawlDf["title"][0])
+    metaDescripton.delay(group_id,crawlDf["meta_desc"][0])
 

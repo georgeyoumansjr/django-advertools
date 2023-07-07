@@ -11,7 +11,7 @@
 <div class="container">
     <div class="container">
         <div class="row d-flex justify-content-center">
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-9 col-sm-12">
                 <form method="post" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
@@ -32,10 +32,13 @@
                 </div>
             </div>
             
-            <div class="col-md-6 col-sm-12 mt-2" style="max-height: 320px;">
+            <div class="col-md-4 col-sm-12 mt-2" style="max-height: 320px;">
                 <ul class="list-group list-group-numbered" id="keywords-view"></ul>
             </div>
-            <div class="col-md-12 mt-4" style="height: 600px; overflow-y: scroll;">
+            <div class="col-md-4 mt-2" id="metaAnalysis" style="max-height: 320px; overflow-y: scroll;">
+                
+            </div>
+            <div class="col-md-4 mt-2" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
                 
             </div>
 

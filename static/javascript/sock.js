@@ -382,6 +382,65 @@ if (random_id) {
         });
     }
 
+    if (message.type === "analysisComplete" && message.task_name === "titleAnalysis") {
+      console.log("Analysis complete");
+      // console.log(message.task_id);
+      var url = "/api/analysis/" + message.task_id + "/";
+      // console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          
+          if(data.status === "success"){
+            const result = data.result;
+
+            const element = document.getElementById("titleAnalysis");
+            element.innerHTML = `
+              <h3 class="text-secondary">Title Analysis</h3>
+              <p>Title is </p>
+              <h5 class="text-primary">${result.title}</h5>
+              <p>${result.description}</p>
+            `;
+            
+          }
+          
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
+
+    if (message.type === "analysisComplete" && message.task_name === "metaDescripton") {
+      console.log("Analysis complete");
+      // console.log(message.task_id);
+      var url = "/api/analysis/" + message.task_id + "/";
+      // console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          
+          if(data.status === "success"){
+            const result = data.result;
+
+            const element = document.getElementById("metaAnalysis");
+            element.innerHTML = `
+              <h3 class="text-secondary">Meta Description Analysis</h3>
+              <p>Description is </p>
+              <p class="text-primary fw-bold">${result.description_meta}</p>
+              <p>${result.description}</p>
+            `;
+            
+          }
+          
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
       // console.log(message.task_id);
@@ -415,7 +474,7 @@ if (random_id) {
           
           if(data.status === "success"){
             const result = data.keywords;
-            console.log(result);
+            // console.log(result);
             const firstTwe = result.slice(0, 20);
             // const sortedData = Object.entries(result).sort(function(a, b) {
             //   return b[1] - a[1];
