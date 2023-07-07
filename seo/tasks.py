@@ -245,6 +245,11 @@ def get_keywords(group_id,body_text):
     body_text = body_text.lower()
     pattern = r'[^a-zA-Z0-9@\s]'
     body_text = re.sub(pattern,"",body_text)
+    numPattern = r'\d+'
+    body_text = re.sub(numPattern,"",body_text)
+    body_text = re.sub(r'\b\w\b', '', body_text)
+    whiteSpacePattern = r'\s+'
+    body_text = re.sub(whiteSpacePattern," ",body_text)
     for text in stopwords["english"]:
         body_text = body_text.replace(" "+text.lower()+" ","")
     keywords = body_text.split()
@@ -255,7 +260,7 @@ def get_keywords(group_id,body_text):
     )
     return {
         "status": "success",
-        "keywords": dict(keywords)
+        "keywords": keywords
     }
 
 

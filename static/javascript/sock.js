@@ -415,11 +415,17 @@ if (random_id) {
           
           if(data.status === "success"){
             const result = data.keywords;
-
+            console.log(result);
+            const firstTwe = result.slice(0, 20);
+            // const sortedData = Object.entries(result).sort(function(a, b) {
+            //   return b[1] - a[1];
+            // });
+            // console.log(sortedData);
             const element = document.getElementById("keywords-view");
-            html = '';
-            for (var value in result){
-              html += `<li class="list-group-item">${value} : ${result[value]}</li>`;
+            html = '<h3 class="text-secondary fw-bold">Keywords</h3>';
+            for (var value in firstTwe){
+              // console.log(value);
+              html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]}</li>`;
             } 
             element.innerHTML = html;
           }
