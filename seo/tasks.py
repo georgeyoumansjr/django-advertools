@@ -251,7 +251,7 @@ def get_keywords(group_id,body_text):
     whiteSpacePattern = r'\s+'
     body_text = re.sub(whiteSpacePattern," ",body_text)
     for text in stopwords["english"]:
-        body_text = body_text.replace(" "+text.lower()+" ","")
+        body_text = body_text.replace(" "+text.lower()+" "," ")
     keywords = body_text.split()
     keywords = dict(Counter(keywords))
     keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
@@ -268,17 +268,26 @@ def get_keywords(group_id,body_text):
 @shared_task
 def titleAnalysis(group_id,title = None):
     task_id = titleAnalysis.request.id
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
-    )
+    
     if title:
         lengthT = len(title)
+        keywords = re.sub(r'[^a-zA-Z0-9@\s]','',title.lower())
+        # keywords = re.sub(r'\b\w\b', '', keywords)
+        whiteSpacePattern = r'\s+'
+        keywords = re.sub(whiteSpacePattern," ",keywords)
+        for text in stopwords["english"]:
+            keywords = keywords.replace(" "+text.lower()+" "," ")
+        keywords = keywords.split()
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
+        )
         if lengthT > 50 and lengthT < 70:
             return {
                 "status": "success",
                 "result": {
                     "title": title,
                     "length": lengthT,
+                    "keywords": keywords,
                     "appropriate": True,
                     "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long."
                 }
@@ -289,12 +298,17 @@ def titleAnalysis(group_id,title = None):
                 "result": {
                     "title": title,
                     "length": lengthT,
+                    "keywords": keywords,
                     "appropriate": False,
                     "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long."
                 }
             }
     else:
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
+        )
         return {
+
                 "status": "failed",
                 "result":{
                     "title": title,
@@ -307,17 +321,26 @@ def titleAnalysis(group_id,title = None):
 @shared_task
 def metaDescripton(group_id,description):
     task_id = metaDescripton.request.id
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"metaDescripton"}
-    )
+    
     if description:
+        keywords = re.sub(r'[^a-zA-Z0-9@\s]','',description.lower())
+        # keywords = re.sub(r'\b\w\b', '', keywords)
+        whiteSpacePattern = r'\s+'
+        keywords = re.sub(whiteSpacePattern," ",keywords)
+        for text in stopwords["english"]:
+            keywords = keywords.replace(" "+text.lower()+" "," ")
+        keywords = keywords.split()
         lengthT = len(description)
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"metaDescripton"}
+        )
         if lengthT > 150 and lengthT < 170:
             return {
                 "status": "success",
                 "result":{
                     "description_meta": description,
                     "length": lengthT,
+                    "keywords":keywords,
                     "appropriate": True,
                     "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long."
                 }
@@ -328,6 +351,7 @@ def metaDescripton(group_id,description):
                 "result":{
                     "description_meta": description,
                     "length": lengthT,
+                    "keywords": keywords,
                     "appropriate": False,
                     "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long."
                 }
@@ -350,6 +374,11 @@ def runCrawler(group_id,url):
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
         "LOG_FILE": "logs/crawlLogs/output_file.log",
     }
+    try:
+        if os.path.exists("output/seo_crawler.jl"):
+            os.remove("output/seo_crawler.jl")
+    except PermissionError:
+        return False
     crawlDf = crawl(
             url,
             output_file="output/seo_crawler.jl",
@@ -366,5 +395,6 @@ def runCrawler(group_id,url):
     get_keywords.delay(group_id,body_text)
 
     titleAnalysis.delay(group_id,crawlDf["title"][0])
-    metaDescripton.delay(group_id,crawlDf["meta_desc"][0])
+    desc = crawlDf["meta_desc"][0] if crawlDf["meta_desc"][0] else ""
+    metaDescripton.delay(group_id,desc)
 

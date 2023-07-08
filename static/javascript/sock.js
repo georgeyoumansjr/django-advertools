@@ -394,13 +394,14 @@ if (random_id) {
           
           if(data.status === "success"){
             const result = data.result;
-
+            console.log(result);
             const element = document.getElementById("titleAnalysis");
             element.innerHTML = `
               <h3 class="text-secondary">Title Analysis</h3>
               <p>Title length is ${result.length}</p>
               <h5 class="text-primary">${result.title}</h5>
               <p>${result.description}</p>
+              <p><span class="fw-bold">Keywords found: </span> ${result.keywords.join(", ")} </p>
             `;
             
           }
@@ -424,15 +425,27 @@ if (random_id) {
           
           if(data.status === "success"){
             const result = data.result;
-
+            console.log(result);
             const element = document.getElementById("metaAnalysis");
-            element.innerHTML = `
+            if (result.keywords){
+              html = `
+                <h3 class="text-secondary">Meta Description Analysis</h3>
+                <p>Description length is ${result.length} </p>
+                <p class="text-primary fw-bold">${result.description_meta}</p>
+                <p>${result.description}</p>
+                <p><span class="fw-bold">Keywords found: </span> ${result.keywords.join(", ")} </p>
+              `;
+            }
+            else{
+              html = `
               <h3 class="text-secondary">Meta Description Analysis</h3>
               <p>Description length is ${result.length} </p>
               <p class="text-primary fw-bold">${result.description_meta}</p>
               <p>${result.description}</p>
             `;
+            }
             
+            element.innerHTML = html
           }
           
         })
@@ -487,6 +500,8 @@ if (random_id) {
               html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${result[value][0].trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
             } 
             element.innerHTML = html;
+            document.getElementById("loadingModal").style.display = "none";
+            document.querySelector('button[type="submit"]').disabled = false;
           }
         })
         .catch((error) => {
