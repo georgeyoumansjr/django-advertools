@@ -398,7 +398,7 @@ if (random_id) {
             const element = document.getElementById("titleAnalysis");
             element.innerHTML = `
               <h3 class="text-secondary">Title Analysis</h3>
-              <p>Title is </p>
+              <p>Title length is ${result.length}</p>
               <h5 class="text-primary">${result.title}</h5>
               <p>${result.description}</p>
             `;
@@ -428,7 +428,7 @@ if (random_id) {
             const element = document.getElementById("metaAnalysis");
             element.innerHTML = `
               <h3 class="text-secondary">Meta Description Analysis</h3>
-              <p>Description is </p>
+              <p>Description length is ${result.length} </p>
               <p class="text-primary fw-bold">${result.description_meta}</p>
               <p>${result.description}</p>
             `;
@@ -484,7 +484,7 @@ if (random_id) {
             html = '<h3 class="text-secondary fw-bold">Keywords</h3>';
             for (var value in firstTwe){
               // console.log(value);
-              html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]}</li>`;
+              html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${result[value][0].trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
             } 
             element.innerHTML = html;
           }
