@@ -1,1 +1,1 @@
-from django_advertools.wsgi import application
+from django_advertools.asgi import application
