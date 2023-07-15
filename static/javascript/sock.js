@@ -569,6 +569,7 @@ if (random_id) {
       var profileBtn = document.getElementById("profile-report");
       profileBtn.disabled = True;
     }
+    console.log(message)
     // Handle the received message as needed
   };
 

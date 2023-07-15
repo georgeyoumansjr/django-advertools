@@ -141,6 +141,7 @@ def sitemapToDf(request):
                 )
                 return render(request, "seo/sitemap.html", {"form": form})
             group_id = request.COOKIES.get('socket_id', None)
+            logger.info("Socket Is is "+ group_id)
             generateReport.delay(group_id, df.to_json(), False, "Sitemap Data profile")
 
             jsonD = df.to_json(orient="records")
@@ -227,6 +228,7 @@ def searchEngineResults(request):
                 return render(request, "seo/serpGoog.html", {"form": form})
 
             group_id = request.COOKIES.get('socket_id', None)
+            logger.info("Socket Is is "+ group_id)
             generateReport.delay(group_id, serpDf.to_json(), False, "SERP Data profile")
 
             domains_df = serpDf["displayLink"].value_counts()
