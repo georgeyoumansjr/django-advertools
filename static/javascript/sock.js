@@ -560,6 +560,7 @@ if (random_id) {
     }
 
     if (message.type === "data_converted") {
+      console.log("Report Generated")
       createToast("","Profiling Report Completed",message.result)
     }
 
