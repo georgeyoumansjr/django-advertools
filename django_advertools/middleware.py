@@ -27,7 +27,7 @@ class CustomCookieMiddleware:
     def __call__(self, request):
         if 'socket_id' not in request.COOKIES:
             response = self.get_response(request)
-            socket_id = uuid.uuid4()
+            socket_id = uuid.uuid1()
             response.set_cookie('socket_id',str(socket_id))
             return response
         return self.get_response(request)
