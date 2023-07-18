@@ -84,3 +84,49 @@ if sys.platform == 'win32':
 ```
 flower -A core --port=5555
 ```
+
+# Deploy in VPS
+
+- Connect to VPS
+
+
+- Install Packages
+
+create a venv
+use the "install_venv_batch.sh" or install from requirements.txt
+if there is memory issue then the "install_venv_batch.sh" splits the requirements.txt file and install seperately in the venv
+
+- Install redis-server
+
+```
+sudo apt-get install redis-server
+```
+
+- Create an exception for port 8000
+ufw is a front-end for iptables and provides an easier way to manage firewall rules on Ubuntu and other Debian-based systems.
+```
+sudo ufw allow 8000
+```
+If not installed 
+```
+sudo apt update
+```
+**then**
+```
+sudo apt install ufw
+```
+and enable
+```
+sudo ufw enable
+```
+and check status
+```
+sudo ufw status
+```
+You can then re-run the ufw allow 8000 cmd
+
+
+- simply run the server in venv 
+```
+python manage.py runserver 0.0.0.0:8000
+```
