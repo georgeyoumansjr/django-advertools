@@ -130,3 +130,37 @@ You can then re-run the ufw allow 8000 cmd
 ```
 python manage.py runserver 0.0.0.0:8000
 ```
+
+## Running Celery and Django from VPS using split terminal
+
+To run both Celery and the Django server from one terminal on your VPS (Virtual Private Server), you can use a tool like `tmux` or `screen`. These tools allow you to create multiple terminal sessions within a single terminal window, making it easy to manage multiple processes simultaneously.
+
+Here's a step-by-step guide on how to achieve this using `tmux`:
+
+1. **Install tmux (if not already installed)**:
+
+   If `tmux` is not installed on your VPS, you can install it using your package manager. For example, on Ubuntu, you can run:
+
+   ```bash
+   sudo apt update
+   sudo apt install tmux
+   ```
+
+2 **Run the Shell Script with tmux enabled which runs both simultaneously**:
+
+    Making the shell script executable 
+    ```
+    chmod +x run_application.sh
+    ```
+
+    Run the executable shell script
+    ```
+    ./run_application.sh
+    ```
+
+    The above command runs celery and django in split terminal session using the tmux package
+    You can switch between the terminal with cmd **Ctrl + arrow Key Up/Down**
+    
+    Exit the session for using
+    "Ctrl + d and b" on both 
+    
