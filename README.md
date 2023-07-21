@@ -163,3 +163,9 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
     
     Exit the session for using
     "Ctrl + d and b" on both 
+
+
+2 **Django_advertools configuration set cmd for nginx**:
+    ```
+    sudo nano /etc/nginx/conf.d/django_advertools.conf
+    ```
