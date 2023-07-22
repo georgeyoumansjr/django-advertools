@@ -357,7 +357,7 @@ console.log("Socket Id is from sock.js "+ random_id);
 if (random_id) {
   // Create the WebSocket connection
   var socket = new WebSocket(
-    "ws://" + window.location.host + "/ws/group/" + random_id + "/"
+    "wss://" + window.location.host + "/ws/group/" + random_id + "/"
   );
 
   
