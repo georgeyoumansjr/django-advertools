@@ -170,6 +170,20 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
 
 
 2 **Django_advertools configuration set cmd for nginx**:
+    
+    Create a configuration for django advertools.smartmgr.com
     ```
-    sudo nano /etc/nginx/conf.d/django_advertools.conf
+    sudo nano /etc/nginx/sites-available/advertools.smartmgr.com
     ```
+    
+    create a linux based link using the cmd below so updates are synced for sites-available
+    ```
+    sudo ln -s /etc/nginx/sites-available/advertools.smartmgr.com /etc/nginx/sites-enabled/
+    ```
+    Restart the nginx
+    ```
+    sudo service nginx restart
+    ```
+
+
+
