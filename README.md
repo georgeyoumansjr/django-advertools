@@ -125,6 +125,10 @@ sudo ufw status
 ```
 You can then re-run the ufw allow 8000 cmd
 
+***If ssl enabled need to also allow port 443 to accept request**
+```
+sudo ufw allow 443
+```
 
 - simply run the server in venv 
 ```
