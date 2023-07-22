@@ -354,11 +354,22 @@ function createToast(type,heading,message){
 var random_id = getCookie("socket_id");
 console.log("Socket Id is from sock.js "+ random_id);
 
+var isSecure = window.location.protocol === 'https:';
+console.log("Is secutr "+ isSecure);
 if (random_id) {
   // Create the WebSocket connection
-  var socket = new WebSocket(
-    "wss://" + window.location.host + "/ws/group/" + random_id + "/"
-  );
+  if(isSecure){
+    // Create the WebSocket connection
+    var socket = new WebSocket(
+      "wss://" + window.location.host + "/ws/group/" + random_id + "/"
+    );
+  }
+  else{
+    // Create the WebSocket connection
+    var socket = new WebSocket(
+      "ws://" + window.location.host + "/ws/group/" + random_id + "/"
+    );
+  }
 
   
   
