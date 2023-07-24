@@ -272,3 +272,19 @@ server {
 }
 ```
 
+> **_NOTE:_**  If you are observing 404 not found for your staticfiles you must be having permission issues with nginx.
+
+**To Resolve the permission issues of nginx**
+Navigate to the directory you are observing the permission issue and list out the permission (typically add any path)
+```
+ls -l /path/to/your/django/project/staticfiles/ 
+```
+first chown (change owner)
+```
+ sudo chown -R nginx:nginx /home/tactical/django-advertools/staticfiles
+```
+add permission here 755- read write and execute perms
+```
+sudo chmod -R 755 /home/tactical/django-advertools/staticfiles
+```
+
