@@ -11,6 +11,8 @@ venv/
 templates/report.html
 templates/report2.html
 
+#ignore dbSQLite
+db.sqlite3
 
 __pycache__/
 *.pyc
