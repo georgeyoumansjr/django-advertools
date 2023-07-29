@@ -7,6 +7,11 @@ venv/
 # any csv files
 *.csv
 
+#ignore templates report file which is generated
+templates/report.html
+templates/report2.html
+
+
 __pycache__/
 *.pyc
 *.pyo
