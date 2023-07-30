@@ -146,7 +146,7 @@ sudo apt install certbot python3-certbot-nginx
 ```
 Create SSL certificates for the domains
 ```
-sudo certbot --nginx -d advertools.smartmgr.com -d www.advertools.smartmgr.com
+sudo certbot --nginx -d advertools.com -d www.advertools.com
 ```
 
 1 **Django_advertools configuration set cmd for nginx**:
