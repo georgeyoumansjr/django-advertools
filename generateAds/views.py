@@ -97,20 +97,22 @@ def generateAds(request):
                             fallback=fallback,
                             max_len=max_len,
                         )
-                    except ValueError:
-                        messages.error(
-                            request,
-                            "The template + fallback should be <= "
-                            + str(max_len)
-                            + " if available",
-                        )
+                    except (ValueError,IndexError) as e:
+                        if e == ValueError:
+                            messages.error(
+                                request,
+                                "The template + fallback should be <= "
+                                + str(max_len)
+                                + " if available",
+                            )
+                        else:
+                            messages.error(
+                                request,
+                                "For the template use only one replacable slot '{}'",
+                            )
                         return redirect("advertisement")
-                    except IndexError:
-                        messages.error(
-                            request,
-                            "For the template use only one replacable slot '{}'",
-                        )
-                        return redirect("advertisement")
+                        
+                    
                 else:
                     generateLargeAds = ad_create(
                         template=template,
