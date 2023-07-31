@@ -12,8 +12,8 @@ staticfiles/
 *.csv
 
 #ignore templates report file which is generated
-report.html
-report2.html
+/templates/report.html
+/templates/report2.html
 
 #ignore dbSQLite
 db.sqlite3
