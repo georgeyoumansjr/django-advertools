@@ -105,6 +105,12 @@ def generateAds(request):
                             + " if available",
                         )
                         return redirect("advertisement")
+                    except IndexError:
+                        messages.error(
+                            request,
+                            "For the template use only one replacable slot '{}'",
+                        )
+                        return redirect("advertisement")
                 else:
                     generateLargeAds = ad_create(
                         template=template,
