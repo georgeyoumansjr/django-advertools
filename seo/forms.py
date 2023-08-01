@@ -40,7 +40,7 @@ class SerpGoogle(forms.Form):
             attrs={
                 "rows": 5,
                 "cols": 40,
-                "placeholder": "Enter the search query(seperate with ',' if multiple)",
+                "placeholder": "Enter the search query(seperate with comma(',') if multiple search query) \nlike flights,tickets,barley",
                 "help_text": "Query you want to get results for",
             }
         )
