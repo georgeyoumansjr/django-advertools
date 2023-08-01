@@ -105,10 +105,10 @@ def generateAds(request):
                                 + str(max_len)
                                 + " if available",
                             )
-                        else:
+                        elif e == IndexError:
                             messages.error(
                                 request,
-                                "For the template use only one replacable slot '{}'",
+                                "For the template use only one replacable slot '{}'"
                             )
                         return redirect("advertisement")
                         
