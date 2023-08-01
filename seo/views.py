@@ -276,11 +276,13 @@ def knowledgeGraph(request):
         if form.is_valid():
             query = form.cleaned_data["query"]
             query = list(map(str.strip, query.split(",")))
+            query = list(filter(None, query))
             languages = form.cleaned_data["languages"]
 
             languages = (
                 list(map(str.strip, languages.split(","))) if languages else None
             )
+            languages = list(filter(None, languages))
 
             limit = form.cleaned_data["limit"]
             if limit:
@@ -321,8 +323,8 @@ def knowledgeGraph(request):
                 )
 
             except Exception as e:
-                # print(e)
-                messages.warning(request, "Unable to analyze the particular column")
+                print(e)
+                messages.warning(request, "Unable to analyze the particular column articleBody")
                 submission = True
                 group_id = request.COOKIES.get('socket_id', None)
                 generateReport.delay(

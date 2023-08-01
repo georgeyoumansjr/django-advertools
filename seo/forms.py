@@ -100,7 +100,7 @@ class KnowledgeG(forms.Form):
             attrs={
                 "rows": 5,
                 "cols": 40,
-                "placeholder": "Enter the search query(seperate with ',' if multiple) like flights,tickets,barley",
+                "placeholder": "Enter the search query(seperate with comma(',') if multiple search query) \nlike flights,tickets,barley",
             }
         )
     )
@@ -116,7 +116,9 @@ class KnowledgeG(forms.Form):
         required=False,
     )
 
-    limit = forms.IntegerField(required=False, min_value=1)
+    limit = forms.IntegerField(required=False,
+                                min_value=1,
+                                help_text="Limits the number of entities to be returned. Maximum is 500. Default is 20")
 
 
 class Crawl(forms.Form):
