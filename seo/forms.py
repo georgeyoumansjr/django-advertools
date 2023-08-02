@@ -136,8 +136,7 @@ class Crawl(forms.Form):
         required=False, help_text="Crawl all reachable links from page"
     )
 
-    headers_only = forms.BooleanField(required=False)
-
+    headers_only = forms.BooleanField(required=False, help_text="Crawl headers of urls only")
     pg_count = forms.IntegerField(
         required=False, min_value=1, max_value=10000, help_text="max crawlable pages"
     )
