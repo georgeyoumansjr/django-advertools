@@ -382,25 +382,24 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PRIVATE_KEY }}
+        password: ${{ secrets.SSH_PASSWORD }}
         port:  ${{ secrets.PORT }}
         script: |
-          cd ~/home/tactical/django-advertools
+          cd ~/django-advertools
           git pull origin main
           git status
           sudo systemctl restart daphne
           sudo systemctl restart gunicorn
           sudo supervisorctl restart celery
-```
 
-- Setup ssh and copy generated keys to authorized_keys
+```
 
 - Go to github actions
 ```
 # Github Secret location
 Settings -> Secrets -> Actions -> New repository secret
 
-PRIVATE_KEY = "Copy generated private key from vps to github secret"
+SSH_PASSWORD = "Your Server password"
 HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
 USERNAME = "YOUR SERVER USERNAME, example: daniel"
 PORT = "Your server Port, example:22"
