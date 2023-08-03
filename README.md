@@ -353,6 +353,10 @@ sudo journalctl -u daphne.service
 Since the Advertools uses the Subprocess library and the project uses VirtualEnv. And based on the observed issues of running the scrapy via subprocess the changes in the library file itself was to be made. for ther function crawl and crawl_headers in **spider.py** and **header_spider.py**
 
 
+## Running CI/CD Pipeline:
+Using the github actions with SSH Key.
+
+
 
 ## Running Celery and Django from VPS using split terminal
 
