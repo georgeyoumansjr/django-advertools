@@ -17,12 +17,22 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    - name: Install SSH client and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openssh-client
+    # check ssh_passowrd
+    - name: Set up SSH agent
+      run: |
+        eval $(ssh-agent -s)
+        echo "${{ secrets.SSH_PASSWORD }}" | ssh-add -
+
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.PRIVATE_KEY }}
+        password: ${{ secrets.SSH_PASSWORD }}
         port:  ${{ secrets.PORT }}
         script: |
           cd ~/home/tactical/django-advertools
