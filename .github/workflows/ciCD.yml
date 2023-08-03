@@ -17,16 +17,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - name: Install SSH client and dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y openssh-client
-    # check ssh_passowrd
-    - name: Set up SSH agent
-      run: |
-        eval $(ssh-agent -s)
-        echo "${{ secrets.SSH_PASSWORD }}" | ssh-add -
-
     - name: Deploy using ssh
       uses: appleboy/ssh-action@master
       with:
