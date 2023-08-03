@@ -356,6 +356,57 @@ Since the Advertools uses the Subprocess library and the project uses VirtualEnv
 ## Running CI/CD Pipeline:
 Using the github actions with SSH Key.
 
+- Setup .github/workflows/CD.yml file 
+```
+# This is a basic workflow to help you get started with Actions
+
+name: Django CD
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Deploy using ssh
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        port:  ${{ secrets.PORT }}
+        script: |
+          cd ~/home/tactical/django-advertools
+          git pull origin main
+          git status
+          sudo systemctl restart daphne
+          sudo systemctl restart gunicorn
+          sudo supervisorctl restart celery
+```
+
+- Setup ssh and copy generated keys to authorized_keys
+
+- Go to github actions
+```
+# Github Secret location
+Settings -> Secrets -> Actions -> New repository secret
+
+PRIVATE_KEY = "Copy generated private key from vps to github secret"
+HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
+USERNAME = "YOUR SERVER USERNAME, example: daniel"
+PORT = "Your server Port, example:22"
+```
+
+
 
 
 ## Running Celery and Django from VPS using split terminal
