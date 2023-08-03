@@ -25,7 +25,7 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port:  ${{ secrets.PORT }}
         script: |
-          cd ~/home/tactical/django-advertools
+          cd ~/django-advertools
           git pull origin main
           git status
           sudo systemctl restart daphne
