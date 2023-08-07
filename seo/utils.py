@@ -16,6 +16,7 @@ def validate_links(links):
     else:
         return True
 
+"""
 
 import re
 import json
@@ -52,3 +53,4 @@ def classify_page_type(path):
 # Sample usage
 page_type = classify_page_type('/product/123')
 print(page_type)
+"""
