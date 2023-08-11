@@ -133,6 +133,9 @@ def siteAud(group_id,url):
     filtered_canonical = pages[condition1 & condition2]
     filtered_canonical = filtered_canonical[["url","canonical"]]
 
+    filtered_canonical_sim = pages[pages["canonical_link"] == True]
+    filtered_canonical_sim = filtered_canonical_sim[["url","canonical"]]
+
     broken_links = pages[~(pages["status"] >= 400)]["url"].to_list()
 
     async_to_sync(channel_layer.group_send)(
@@ -171,7 +174,8 @@ def siteAud(group_id,url):
                             "count":len(missing_canonical)
                         },
                         "similar": {
-                            
+                            "values": filtered_canonical_sim.reset_index(drop=True).to_dict(),
+                            "count": len(filtered_canonical_sim)
                         },
                         "different": {
                             "values": filtered_canonical.reset_index(drop=True).to_dict(),
