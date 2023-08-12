@@ -706,7 +706,7 @@ def siteAudit(request):
             filtered_canonical_sim = pages[pages["canonical_link"] == True]
             filtered_canonical_sim = filtered_canonical_sim[["url","canonical"]]
 
-            broken_links = pages[~(pages["status"] >= 400)]["url"].to_list()
+            broken_links = pages[(pages["status"] >= 400)]["url"].to_list()
 
             
 
