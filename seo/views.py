@@ -621,7 +621,7 @@ def siteAudit(request):
             url = form.cleaned_data["url"]
             group_id = request.COOKIES.get('socket_id', None)
             custom_settings = {
-                "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "USER_AGENT": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
                 "LOG_FILE": "logs/crawlLogs/output_file.log",
                 "CLOSESPIDER_PAGECOUNT": 1000
             }
