@@ -102,7 +102,7 @@
                 <h3 class="h3 text-secondary">Keywords</h3>
                 <ul class="list-group list-group-numbered" id="keywords-view">
                     {% for key, value in context.result.audit.body.keywords.items %}
-                        <li class="list-group-item">keyword {{ key.0 }} appeared {{ key.1 }} times</li>
+                        <li class="list-group-item">keyword <b>{{ key.0 }}</b> appeared {{ key.1 }} times</li>
                     {% endfor %}
 
                 </ul>
@@ -111,14 +111,15 @@
                 <h3 class="h3 text-secondary">Stopwords/Commonwords</h3>
                 <ul class="list-group list-group-numbered" id="keywords-view">
                     {% for key, value in context.result.audit.body.commonWords.items %}
-                        <li class="list-group-item">Common Words {{ key }} appeared on {{ value }}</li>
+                        <li class="list-group-item">Common Words <b>{{ key }}</b> appeared on {{ value }}</li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="col-md-10 mt-2" style="max-height: 320px; overflow-y: scroll;">
+                <h3 class="h3 text-secondary mt-1">Broken Links</h3>
                 <ul class="list-group list-group-numbered">
                     {% for link in context.result.audit.links.broken_links %}
-                        <li class="list-group-item"><a href="{{ link }}" class="">{{ link }}</a></li>
+                        <li class="list-group-item"><a href="{{ link }}" target="_blank" class="">{{ link }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
