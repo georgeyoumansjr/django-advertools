@@ -102,7 +102,7 @@
                 <h3 class="h3 text-secondary">Keywords</h3>
                 <ul class="list-group list-group-numbered" id="keywords-view">
                     {% for key, value in context.result.audit.body.keywords.items %}
-                        <li class="list-group-item">keyword {{ key.0 }} appeared on {{ key.1 }}</li>
+                        <li class="list-group-item">keyword {{ key.0 }} appeared {{ key.1 }} times</li>
                     {% endfor %}
 
                 </ul>

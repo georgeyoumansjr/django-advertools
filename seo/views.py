@@ -625,19 +625,19 @@ def siteAudit(request):
                 "LOG_FILE": "logs/crawlLogs/output_file.log",
                 "CLOSESPIDER_PAGECOUNT": 1000
             }
-            # try:
-            #     if os.path.exists("logs/crawlLogs/output_file.log"):
-            #         os.remove("logs/crawlLogs/output_file.log")
-            #     if os.path.exists("output/seo_crawler.jl"):
-            #         os.remove("output/seo_crawler.jl")
-            # except PermissionError:
-            #     return False
-            # crawlDf = crawl(
-            #         url,
-            #         output_file="output/seo_crawler.jl",
-            #         follow_links=True,
-            #         custom_settings=custom_settings,
-            #     )
+            try:
+                if os.path.exists("logs/crawlLogs/output_file.log"):
+                    os.remove("logs/crawlLogs/output_file.log")
+                if os.path.exists("output/seo_crawler.jl"):
+                    os.remove("output/seo_crawler.jl")
+            except PermissionError:
+                return False
+            crawlDf = crawl(
+                    url,
+                    output_file="output/seo_crawler.jl",
+                    follow_links=True,
+                    custom_settings=custom_settings,
+                )
             
             
             logger.info("Socket Id"+group_id+" SEO crawl one complete")
