@@ -40,8 +40,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def bodyAnalysis(group_id,url):
-    task_id = bodyAnalysis.request.id
+
 
 @shared_task
 def robotsAnalysis(group_id,urllist):
@@ -51,6 +50,51 @@ def robotsAnalysis(group_id,urllist):
 @shared_task
 def sitemapAnalysis(group_id,urllist):
     pass
+
+
+@shared_task
+def urlAnalysis(group_id,url_dict):
+
+    task_id = urlAnalysis.request.id
+    
+    
+
+@shared_task
+def bodyTextAnalysis(group_id,body_text):
+
+    task_id = bodyTextAnalysis.request.id
+    pages = pd.DataFrame(body_text)
+
+    logger.info("Entered Body text analysis portion")
+
+    ### Word Count and text readability of the body text found in html generated content
+    pages['word_count'] = pages['body_text'].apply(get_word_count)
+    pages['readability'] = pages['body_text'].apply(text_readability)
+
+    ### Create a seperate column with list of keywords and list of stopwords 
+    pages['keywords'] = pages['body_text'].apply(extract_keywords)
+    keywords = pages['keywords'].sum()
+    keywords = dict(Counter(keywords))
+    
+    pages['common_words'] = pages["body_text"].apply(extract_stopwords)
+    common_words = pages['common_words'].sum()
+    common_words = dict(Counter(common_words))
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"bodyTextAnalysis"}
+    )
+
+    return {
+        "status": "success",
+        "result":{
+            "body": {
+                "wordCount": pages["word_count"],
+                "readability": pages["readability"],
+                "keywords": keywords,
+                "commonWords": common_words,
+            }
+        }
+    }
 
 
 @shared_task
@@ -106,18 +150,9 @@ def audit(group_id,url):
     
     ## Creation of Columns based based on functionalities
 
-    ### Word Count and text readability of the body text found in html generated content
-    pages['word_count'] = pages['body_text'].apply(get_word_count)
-    pages['readability'] = pages['body_text'].apply(text_readability)
+    body_text = pages["body_text"].to_dict()
 
-    ### Create a seperate column with list of keywords and list of stopwords 
-    pages['keywords'] = pages['body_text'].apply(extract_keywords)
-    keywords = pages['keywords'].sum()
-    keywords = dict(Counter(keywords))
-    
-    pages['common_words'] = pages["body_text"].apply(extract_stopwords)
-    common_words = pages['common_words'].sum()
-    common_words = dict(Counter(common_words))
+    bodyTextAnalysis.delay(group_id,body_text)
 
 
     # Get character counts of SEO desc , title
@@ -152,7 +187,7 @@ def audit(group_id,url):
     broken_links = pages[~(pages["status"] >= 400)]["url"].to_list()
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"audit"}
     )
 
     return {
@@ -160,12 +195,6 @@ def audit(group_id,url):
         "result":{
             
             "audit": {
-                "body": {
-                    "wordCount": pages["word_count"],
-                    "readability": pages["readability"],
-                    "keywords": keywords,
-                    "commonWords": common_words,
-                },
                 "head":{
                     "meta_desc": {
                         "length_overview": desc_length,
@@ -203,8 +232,7 @@ def audit(group_id,url):
                     "latency": latency,
                     "content_size": content_size,
 
-                }
-
+                },
             }
         }
     }

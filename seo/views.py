@@ -20,7 +20,7 @@ import os
 # from decouple import config
 from collections import Counter
 from .utils import *
-from seoTasks.siteAudit import audit
+from .seoTasks.audit import audit 
 
 # from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
