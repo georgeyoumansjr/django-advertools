@@ -20,6 +20,7 @@ import os
 # from decouple import config
 from collections import Counter
 from .utils import *
+from seoTasks.siteAudit import audit
 
 # from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
@@ -767,4 +768,22 @@ def siteAudit(request):
                                                           "processing": True,"context":context})
     else:
         return render(request,"seo/siteAudit.html",{"form":form})
+
+
+def siteAuditv2(request):
+    form = SeoAnalyzeForm()
+    hTitles = ["h1","h2","h3","h4","h6"]
+    if request.method == "POST":
+        form = SeoAnalyzeForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data["url"]
+            group_id = request.COOKIES.get('socket_id', None)
+            # runCrawler.delay(group_id,url)
+            audit.delay(group_id,url)
+            return render(request,"seo/siteAudit2.html",{"form":form,
+                                                          "processing": True})
+    else:
+        return render(request,"seo/siteAudit2.html",{"form":form})
+
+
 

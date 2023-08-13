@@ -44,9 +44,19 @@ def bodyAnalysis(group_id,url):
     task_id = bodyAnalysis.request.id
 
 @shared_task
-def siteAud(group_id,url):
+def robotsAnalysis(group_id,urllist):
+    pass
 
-    task_id = siteAud.request.id
+
+@shared_task
+def sitemapAnalysis(group_id,urllist):
+    pass
+
+
+@shared_task
+def audit(group_id,url):
+
+    task_id = audit.request.id
 
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
@@ -85,10 +95,13 @@ def siteAud(group_id,url):
     print(robots_url)
     # robotsTxtAn.delay(group_id,robots_url,url_list)
 
+    try:
+        # Review sitemap
+        sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
+        print(sitemap_url)
+    except Exception as e:
+        pass
 
-    # Review sitemap
-    sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
-    print(sitemap_url)
     # sitemapAna.delay(group_id,sitemap_url,url_list)
     
     ## Creation of Columns based based on functionalities
