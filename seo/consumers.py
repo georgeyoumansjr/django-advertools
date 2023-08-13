@@ -87,6 +87,23 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+
+    async def analysisFailed(self, event):
+        task_id = event["task_id"]
+        task_name = event["task_name"]
+        result = event["result"]
+        
+
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "analysisFailed",
+                    "result": result,
+                    "task_id": task_id,
+                    "task_name": task_name,
+                }
+            )
+        )
     
     async def getKeywords(self, event):
         task_id = event["task_id"]

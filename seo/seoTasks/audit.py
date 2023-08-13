@@ -43,14 +43,92 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def robotsAnalysis(group_id,urllist):
-    pass
+def robotsAnalysis(group_id,robots_url,url_dict):
+    task_id = robotsAnalysis.request.id 
+    
+    pages = pd.DataFrame(url_dict)
+    try:
+        robots_df = robotstxt_to_df(robots_url)
+        test_df = robotstxt_test(
+            robots_url, 
+            user_agents=['Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'],
+            urls=pages['url']
+            )
+        blocked_pages = test_df[test_df['can_fetch'] == False]
+    except Exception as e:
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisFailed", 
+                                  "result": "Robots Txt analysis failed",
+                                  "task_id": task_id,
+                                  "task_name":"robotsAnalysis"})
+        return {
+            "status": "failed",
+            "result":{
+                "error": "Unable to find the sitemap url"
+            }
+        }
+
+    
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"bodyTextAnalysis"}
+    )
+    
+    return {
+        "status": "success",
+        "result":{
+            "robots": {
+                "blocked": blocked_pages["url_path"].to_list(),
+                "count": len(blocked_pages),
+                "totalTested": len(test_df)
+            }
+        }
+    }
+
+
 
 
 @shared_task
-def sitemapAnalysis(group_id,urllist):
-    pass
+def sitemapAnalysis(group_id,robots_url,url_dict):
+    task_id = sitemapAnalysis.request.id
+    pages = pd.DataFrame(url_dict)
 
+    try:
+        sitemap_df = sitemap_to_df(robots_url)
+        missing_in_sitemap = set(pages['url']) - set(sitemap_df['loc'])
+        missing_in_crawl = set(sitemap_df['loc']) - set(pages['url'])
+
+    except ValueError:
+        try:
+            sitemap_df = sitemap_df(robots_url.replace("robots.txt","sitemap.xml"))
+        except Exception as e:
+            async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisFailed", 
+                                  "result": "Sitemap analysis failed",
+                                  "task_id": task_id,
+                                  "task_name":"sitemapAnalysis"})
+            return {
+                "status": "failed",
+                "result":{
+                    "message": e
+                }
+            }
+
+    return {
+        "status":"success",
+        "result": {
+            "missing":{
+                "sitemap": {
+                    "urls" : list(missing_in_sitemap),
+                    "count": len(missing_in_sitemap)
+                },
+                "crawl": {
+                    "urls" : list(missing_in_crawl),
+                    "count": len(missing_in_crawl)
+                }
+            }
+        }
+    }
 
 @shared_task
 def urlAnalysis(group_id,url_dict):
@@ -103,7 +181,7 @@ def audit(group_id,url):
     task_id = audit.request.id
 
     custom_settings = {
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "USER_AGENT": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
         "LOG_FILE": "logs/crawlLogs/output_file.log",
         "CLOSESPIDER_PAGECOUNT": 1000
     }
@@ -139,14 +217,11 @@ def audit(group_id,url):
     print(robots_url)
     # robotsTxtAn.delay(group_id,robots_url,url_list)
 
-    try:
-        # Review sitemap
-        sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
-        print(sitemap_url)
-    except Exception as e:
-        pass
+    url_dict = url_list.to_dict()
+    robotsAnalysis.delay(group_id,robots_url,url_dict)
 
     # sitemapAna.delay(group_id,sitemap_url,url_list)
+    sitemapAnalysis.delay(group_id,robots_url,url_dict)
     
     ## Creation of Columns based based on functionalities
 
