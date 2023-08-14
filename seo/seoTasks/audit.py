@@ -149,24 +149,30 @@ def bodyTextAnalysis(group_id,body_text):
 
     task_id = bodyTextAnalysis.request.id
     pages = pd.DataFrame({"body_text": body_text})
-    print(pages)
+    # print(pages)
     logger.info("Entered Body text analysis portion")
     # print(task_id)
+
+    # fill na with string
+    pages["body_text"] = pages["body_text"].fillna(" ")
 
     ### Word Count and text readability of the body text found in html generated content
     pages['word_count'] = pages['body_text'].apply(get_word_count)
     pages['readability'] = pages['body_text'].apply(text_readability)
 
-    # print(pages)
+    
 
     ### Create a seperate column with list of keywords and list of stopwords 
     pages['keywords'] = pages['body_text'].apply(extract_keywords)
+    
     keywords = pages['keywords'].sum()
     keywords = dict(Counter(keywords))
     
+
     pages['common_words'] = pages["body_text"].apply(extract_stopwords)
     common_words = pages['common_words'].sum()
     common_words = dict(Counter(common_words))
+    
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"bodyTextAnalysis"}
@@ -176,8 +182,8 @@ def bodyTextAnalysis(group_id,body_text):
         "status": "success",
         "result":{
             "body": {
-                "wordCount": pages["word_count"],
-                "readability": pages["readability"],
+                "wordCount": pages["word_count"].to_list(),
+                "readability": pages["readability"].to_list(),
                 "keywords": keywords,
                 "commonWords": common_words,
             }

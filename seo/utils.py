@@ -49,9 +49,8 @@ def extract_keywords(body_text):
     for text in stopwords["english"]:
         body_text = body_text.replace(" "+text.lower()+" "," ")
     keywords = body_text.split()
-    keywords = dict(Counter(keywords))
-    keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
-
+    # keywords = dict(Counter(keywords))
+    # keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
     return keywords
 
 def text_readability(text):
