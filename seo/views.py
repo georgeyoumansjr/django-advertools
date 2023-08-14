@@ -778,7 +778,7 @@ def siteAuditv2(request):
         if form.is_valid():
             url = form.cleaned_data["url"]
             group_id = request.COOKIES.get('socket_id', None)
-            # runCrawler.delay(group_id,url)
+            
             audit.delay(group_id,url)
             return render(request,"seo/siteAudit2.html",{"form":form,
                                                           "processing": True})

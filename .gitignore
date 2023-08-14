@@ -9,7 +9,7 @@ staticfiles/
 
 
 # any csv files
-*.csv
+# *.csv
 
 #ignore templates report file which is generated
 /templates/report.html

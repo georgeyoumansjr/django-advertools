@@ -45,7 +45,8 @@ logger = logging.getLogger(__name__)
 @shared_task
 def robotsAnalysis(group_id,robots_url,url_dict):
     task_id = robotsAnalysis.request.id 
-    
+    logger.info("Robots Analysis started")
+    print(task_id)
     pages = pd.DataFrame(url_dict)
     try:
         robots_df = robotstxt_to_df(robots_url)
@@ -92,7 +93,8 @@ def robotsAnalysis(group_id,robots_url,url_dict):
 def sitemapAnalysis(group_id,robots_url,url_dict):
     task_id = sitemapAnalysis.request.id
     pages = pd.DataFrame(url_dict)
-
+    logger.info("Sitemap Analysis started ")
+    print(task_id)
     try:
         sitemap_df = sitemap_to_df(robots_url)
         missing_in_sitemap = set(pages['url']) - set(sitemap_df['loc'])
@@ -144,6 +146,7 @@ def bodyTextAnalysis(group_id,body_text):
     pages = pd.DataFrame(body_text)
 
     logger.info("Entered Body text analysis portion")
+    print(task_id)
 
     ### Word Count and text readability of the body text found in html generated content
     pages['word_count'] = pages['body_text'].apply(get_word_count)
@@ -179,7 +182,7 @@ def bodyTextAnalysis(group_id,body_text):
 def audit(group_id,url):
 
     task_id = audit.request.id
-
+    
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
         "LOG_FILE": "logs/crawlLogs/output_file.log",
@@ -202,15 +205,15 @@ def audit(group_id,url):
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
-    logger.info("Socket Id"+group_id+" SEO crawl one complete")
+    logger.info("Socket Id"+group_id+" SEO crawl one complete for task "+task_id)
     pages = pd.read_json("output/seo_crawler.jl",lines=True)
 
 
-    url_list = crawlDf["url"]
+    url_list = pages["url"]
     # print(url_list)
     # print(url_list.to_list())
 
-    url_df = url_to_df(urls=url_list)
+    url_df = url_to_df(url_list)
     # print(url_df)
 
     robots_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/robots.txt"
