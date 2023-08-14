@@ -47,7 +47,7 @@ def robotsAnalysis(group_id,robots_url,url_dict):
     task_id = robotsAnalysis.request.id 
     logger.info("Robots Analysis started")
     print(task_id)
-    pages = pd.DataFrame(url_dict)
+    pages = pd.DataFrame({"url":url_dict})
     try:
         robots_df = robotstxt_to_df(robots_url)
         test_df = robotstxt_test(
@@ -72,7 +72,7 @@ def robotsAnalysis(group_id,robots_url,url_dict):
     
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"bodyTextAnalysis"}
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"RobotsTextAnalysis"}
     )
     
     return {
@@ -92,7 +92,7 @@ def robotsAnalysis(group_id,robots_url,url_dict):
 @shared_task
 def sitemapAnalysis(group_id,robots_url,url_dict):
     task_id = sitemapAnalysis.request.id
-    pages = pd.DataFrame(url_dict)
+    pages = pd.DataFrame({"url": url_dict})
     logger.info("Sitemap Analysis started ")
     print(task_id)
     try:
@@ -115,6 +115,11 @@ def sitemapAnalysis(group_id,robots_url,url_dict):
                     "message": e
                 }
             }
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"SitemapAnalysis"}
+    )
+    
 
     return {
         "status":"success",
@@ -143,14 +148,16 @@ def urlAnalysis(group_id,url_dict):
 def bodyTextAnalysis(group_id,body_text):
 
     task_id = bodyTextAnalysis.request.id
-    pages = pd.DataFrame(body_text)
-
+    pages = pd.DataFrame({"body_text": body_text})
+    print(pages)
     logger.info("Entered Body text analysis portion")
-    print(task_id)
+    # print(task_id)
 
     ### Word Count and text readability of the body text found in html generated content
     pages['word_count'] = pages['body_text'].apply(get_word_count)
     pages['readability'] = pages['body_text'].apply(text_readability)
+
+    # print(pages)
 
     ### Create a seperate column with list of keywords and list of stopwords 
     pages['keywords'] = pages['body_text'].apply(extract_keywords)
@@ -216,20 +223,23 @@ def audit(group_id,url):
     url_df = url_to_df(url_list)
     # print(url_df)
 
+
     robots_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/robots.txt"
     print(robots_url)
     # robotsTxtAn.delay(group_id,robots_url,url_list)
 
     url_dict = url_list.to_dict()
+    # url_dict = {"url": url_dict}
     robotsAnalysis.delay(group_id,robots_url,url_dict)
 
-    # sitemapAna.delay(group_id,sitemap_url,url_list)
+    # sitemapAna.delay(group_id,sitemap_url,url_dict)
     sitemapAnalysis.delay(group_id,robots_url,url_dict)
     
     ## Creation of Columns based based on functionalities
 
-    body_text = pages["body_text"].to_dict()
-
+    body_text = pages["body_text"]
+    body_text = body_text.to_dict()
+    # body_text = {"body_text": body_text}
     bodyTextAnalysis.delay(group_id,body_text)
 
 
