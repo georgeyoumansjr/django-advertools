@@ -515,6 +515,52 @@ if (random_id) {
         });
     }
 
+    if (message.type === "analysisComplete" && message.task_name === "audit") {
+      console.log("Audit complete");
+      
+      var url = "/api/analysis/" + message.task_id + "/";
+
+      fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.status === "success"){
+          const overview = data.result.overview;
+          const elemOverview = document.querySelector("#overview .row");
+          const keys = Object.keys(overview);
+          var html = ``;
+          keys.forEach((key)=>{
+            let unit = "bytes";
+            let type = "content"
+            if(key === "latency"){
+              unit = "seconds";
+              type = "downloaded content";
+            }
+             html += `
+               <div class="col-md-6">
+                <div class="card bg-success text-white">
+                  <div class="container m-2">
+                    <h5 class="h5 card-title fw-bold">${key} Overview</h5>
+                    <div class="card-body">
+                      <b>Average ${key} of ${type}:</b> ${ overview.key.mean.toFixed(4) } ${unit}.
+                    </div>
+                    <div class="card-body">
+                      <b>Max ${key} of ${type}:</b> ${ overview.key.max.toFixed(4)} ${unit}.
+                    </div>
+                    <div class="card-body">
+                      <b>Minimum ${key} of ${type}:</b>  ${ overview.key.min.toFixed(4)} ${unit}.
+                    </div>
+                  </div>
+                </div>
+              </div>
+             `
+          })
+          elemOverview.innerHTML = html;
+        }
+      });
+    }
+
+
+
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
       // console.log(message.task_id);
