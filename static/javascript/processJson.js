@@ -252,8 +252,8 @@ export function analysisBodyText(data) {
       } <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${value.trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
     }
     cElem.innerHTML = html;
-    console.log(body["wordCount"]);
-    console.log(body["readability"]);
+    // console.log(body["wordCount"]);
+    // console.log(body["readability"]);
     dualLineChart(
       "Body Text Word Count and readability",
       body["wordCount"],
@@ -267,7 +267,7 @@ export function analysisBodyText(data) {
 // Sitemap analysis of Site-Audit Feature
 export function analysisSiteMap(data) {
   if (data.status === "success") {
-    console.log(data);
+    // console.log(data);
     const result = data.result;
 
     document.getElementById(

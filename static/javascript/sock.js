@@ -42,7 +42,7 @@ if (random_id) {
 
     if (message.type === "analysisComplete" && message.task_name === "crawlLogs") {
       console.log("Crawl logs Analysis complete");
-      console.log(message.task_id);
+      
       var url = "/api/analysis/" + message.task_id + "/";
       console.log(url);
       fetchDataAndProcess(url, analysisCrawlLogs, (error) => console.error("Error:", error));
@@ -51,7 +51,7 @@ if (random_id) {
 
     if (message.type === "analysisComplete" && message.task_name === "contentAnalysis") {
       console.log("Analysis complete");
-      // console.log(message.task_id);
+      
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
       fetchDataAndProcess(url, analysisContent,(error) => console.error("Error:", error));
