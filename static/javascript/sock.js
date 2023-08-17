@@ -1,5 +1,5 @@
 // Replace <task_id> with the actual value
-import { dualLineChart } from "./analysisModule.js";
+import { dualLineChart, createDonutChart, createPieChart } from "./chartFunctions.js";
 
 
 
@@ -20,141 +20,6 @@ function getCookie(cname) {
 }
 // random_id = random_id();
 
-// For key value
-function createDonutChart(
-  jsonData,
-  title = "Donut Chart",
-  label = "label",
-  elementId = ""
-) {
-  var ctx = document.getElementById(elementId).getContext("2d");
-  if (typeof jsonData === 'string'){
-    jsonData = JSON.parse(jsonData);
-  }
-  var labels = Object.keys(jsonData);
-  // console.log(labels)
-  var length = labels.length;
-
-  var data = Object.values(jsonData);
-
-  var colors = generateRandomColors(length);
-  // Define the chart data
-  var data = {
-    labels: labels,
-    datasets: [
-      {
-        label: label,
-        backgroundColor: colors,
-        data: data,
-      },
-    ],
-  };
-
-  // Create the chart
-  var donutChart = new Chart(document.getElementById(elementId), {
-    type: "doughnut",
-    data: data,
-    options: {
-      cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
-      responsive: true,
-      plugins: {
-        afterDraw: function (chart) {
-          var width = chart.chart.width;
-          var height = chart.chart.height;
-          var ctx = chart.chart.ctx;
-
-          ctx.restore();
-          var fontSize = (height / 114).toFixed(2);
-          ctx.font = fontSize + "em sans-serif";
-          ctx.textBaseline = "middle";
-
-          var text = "Status Frequencies";
-          var textX = Math.round((width - ctx.measureText(text).width) / 2);
-          var textY = height / 2;
-
-          ctx.fillText(text, textX, textY);
-          ctx.save();
-        },
-        title: {
-          display: true,
-          text: title,
-          font: {
-            size: 18,
-          },
-        },
-      },
-    },
-  });
-  // Apply ellipsis and hover display for labels
-  
-}
-
-function createPieChart(
-  jsonData,
-  title = "Pie Chart",
-  label = "label",
-  elementId = ""
-) {
-  var ctx = document.getElementById(elementId).getContext("2d");
-  if (typeof jsonData === 'string'){
-    jsonData = JSON.parse(jsonData);
-  }
-  var labels = Object.keys(jsonData);
-  // console.log(labels)
-  var length = labels.length;
-
-  var data = Object.values(jsonData);
-
-  var colors = generateRandomColors(length);
-  // Define the chart data
-  var data = {
-    labels: labels,
-    datasets: [
-      {
-        label: label,
-        backgroundColor: colors,
-        data: data,
-      },
-    ],
-  };
-
-  // Create the chart
-  var pieChart = new Chart(document.getElementById(elementId), {
-    type: "pie",
-    data: data,
-    options: {
-      cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
-      responsive: true,
-      plugins: {
-        afterDraw: function (chart) {
-          var width = chart.chart.width;
-          var height = chart.chart.height;
-          var ctx = chart.chart.ctx;
-
-          ctx.restore();
-          var fontSize = (height / 114).toFixed(2);
-          ctx.font = fontSize + "em sans-serif";
-          ctx.textBaseline = "middle";
-
-          var text = "Status Frequencies";
-          var textX = Math.round((width - ctx.measureText(text).width) / 2);
-          var textY = height / 2;
-
-          ctx.fillText(text, textX, textY);
-          ctx.save();
-        },
-        title: {
-          display: true,
-          text: title,
-          font: {
-            size: 18,
-          },
-        },
-      },
-    },
-  });
-  
-}
 
 
 function generateDynamicContent(data) {
@@ -532,9 +397,9 @@ if (random_id) {
           const brokenlinks = data.result.audit.links["broken_links"];
           const head = data.result.audit.head;
 
-          console.log(JSON.stringify(data));
+          // console.log(JSON.stringify(data));
 
-          console.log(brokenlinks);
+          // console.log(brokenlinks);
           const elemOverview = document.querySelector("#overview .row");
           const elemBrokenLinks = document.getElementById("broken-links");
           const keys = Object.keys(overview);
@@ -585,7 +450,11 @@ if (random_id) {
 
           elemBrokenLinks.innerHTML = linkHtml;
 
-          document.getElementById("meta-overview").innerHTML = `
+          
+
+          let missingMeta = `<h5 class="h5 text-primary">Missing Meta Description in total ${head["meta_desc"]["missing"]["count"]}<h5>`;
+          
+          missingMeta +=  `
           <div class="card bg-primary text-white">
             <div class="container m-2">
               <h5 class="h5 card-title fw-bold">Meta Description Length Overview</h5>
@@ -600,20 +469,12 @@ if (random_id) {
               </div>
             </div>
           </div>
-          `;
+         `;
 
-          let missingMeta = `<h5 class="h5 text-primary">Missing Meta Description in total ${head["meta_desc"]["missing"]["count"]}<h5>`;
-          
-          head["meta_desc"]["missing"]["urls"].forEach((value) => {
-            missingMeta += ` <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
-            `
-          })
-
-          document.getElementById("meta-missing").innerHTML = missingMeta;
+          document.getElementById("meta-overview").innerHTML = missingMeta;
 
           document.getElementById("titleAnalysis").innerHTML = `
-          <h4 class="h4 text-primary">Title was missing in ${head["title"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
-          <div class="col-md-6">
+            <h4 class="h4 text-primary">Title was missing in ${head["title"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
             <div class="card bg-primary text-white">
               <div class="container m-2">
                 <h5 class="h5 card-title fw-bold">Title Length Overview</h5>
@@ -628,8 +489,6 @@ if (random_id) {
                 </div>
               </div>
             </div>
-          </div>
-          
           `;
 
           document.getElementById("canonicalAnalysis").innerHTML = `
@@ -650,10 +509,10 @@ if (random_id) {
       .then((response) => response.json())
       .then((data) => {
         if(data.status === "success"){
-          console.log(data);
+          // console.log(data);
           const body = data.result.body;
           const keywords = body["keywords"];
-          console.log(keywords);
+          // console.log(keywords);
           const firstTwe = Object.fromEntries(Object.entries(keywords).slice(0, 20));
             // const sortedData = Object.entries(result).sort(function(a, b) {
             //   return b[1] - a[1];
@@ -685,6 +544,84 @@ if (random_id) {
       });
     }
     
+    if (message.type === "analysisComplete" && message.task_name === "SitemapAnalysis") {
+      console.log("Sitemap txt analysis");
+      // console.log(message.task_id);
+      var url = "/api/result/" + message.task_id + "/";
+      console.log(url);
+
+      fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.status === "success"){ 
+          console.log(data);
+          const result = data.result;
+
+          document.getElementById("sitemap-overview").innerHTML = `<h5>Total Sitemap Urls Found is <b>${result["overview"]["count"]}</b> with unique <b>${result["overview"]["unique"]}</b></h5>`;
+
+          let sitemapHtml = `<h6>Urls Missing in Sitemap but found in Crawl <b>${result["missing"]["sitemap"]["count"]}</b></h6>`;
+          
+
+          if( result["missing"]["sitemap"]["urls"].length > 1){
+            result["missing"]["sitemap"]["urls"].forEach((value) =>{
+              
+              sitemapHtml +=`
+                <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
+              `
+            });
+
+          }
+
+          document.getElementById("sitemap-crawl").innerHTML = sitemapHtml;
+
+          let crawlHtml = `<h6>Urls Missing in Crawled but found in Sitemap <b>${result["missing"]["crawl"]["count"]}</b></h6>`;
+          
+
+          if( result["missing"]["crawl"]["urls"].length > 1){
+            result["missing"]["crawl"]["urls"].forEach((value) =>{
+              
+              crawlHtml +=`
+                <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
+              `
+            });
+
+          }
+          document.getElementById("crawl-sitemap").innerHTML = crawlHtml;
+
+        }
+      })
+    }
+
+    if (message.type === "analysisComplete" && message.task_name === "RobotsTextAnalysis") {
+      console.log("Crawl Read");
+      // console.log(message.task_id);
+      var url = "/api/result/" + message.task_id + "/";
+      console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          if(data.status === "success"){ 
+            console.log(data);
+            const robots = data.result.robots;
+
+            let robotsElem = `<h5 class="h5 text-primary">Total Test performed in Robots Txt <b>${robots["totalTested"]}</b> where blocked pages were found to be <b>${robots["count"]}</b></h5>`;
+
+            if( robots["blocked"].length > 1){
+              robots["blocked"].forEach((value) =>{
+                
+                robotsElem +=`
+                  <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
+                `
+              });
+  
+            }
+            
+            document.getElementById("robots-test").innerHTML = robotsElem;
+
+          
+          }
+        });
+    }
 
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
