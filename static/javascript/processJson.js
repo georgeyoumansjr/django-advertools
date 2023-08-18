@@ -2,6 +2,7 @@ import {
   dualLineChart,
   createDonutChart,
   createPieChart,
+  createLineChart,
 } from "./chartFunctions.js";
 import { generateDynamicContent, createToast } from "./utils.js";
 
@@ -183,10 +184,10 @@ export function analysisAudit(data) {
     document.getElementById("meta-overview").innerHTML = missingMeta;
 
     document.getElementById("titleAnalysis").innerHTML = `
-          <h4 class="h4 text-primary">Title was missing in ${
+          <h5 class="h5 text-success">Title was missing in ${
             head["title"]["missing"]["count"]
-          } out of ${head["title"]["length_overview"]["count"]}</h4>
-          <div class="card bg-primary text-white">
+          } out of ${head["title"]["length_overview"]["count"]}</h5>
+          <div class="card bg-success text-white">
             <div class="container m-2">
               <h5 class="h5 card-title fw-bold">Title Length Overview</h5>
               <div class="card-body">
@@ -212,7 +213,8 @@ export function analysisAudit(data) {
         <h4 class="h4 text-primary">Canonical Links was missing in ${head["canonical"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
         <p class="p">Canonical Links were different in <b>${head["canonical"]["different"]["count"]}</b> and similar in <b>${head["canonical"]["similar"]["count"]}</b></p>
         `;
-  }
+  
+    }
 }
 
 // Body text anlysis from site-audit feature
@@ -254,13 +256,13 @@ export function analysisBodyText(data) {
     cElem.innerHTML = html;
     // console.log(body["wordCount"]);
     // console.log(body["readability"]);
-    dualLineChart(
-      "Body Text Word Count and readability",
+    createLineChart("lineChart",
+      "Body Text Word Count",
       body["wordCount"],
-      body["readability"],
       "Word Count",
-      "Readability"
     );
+
+    createLineChart("lineChart1","Body Text Readability",body["readability"],"Readability Score");
   }
 }
 
@@ -272,7 +274,7 @@ export function analysisSiteMap(data) {
 
     document.getElementById(
       "sitemap-overview"
-    ).innerHTML = `<h5>Total Sitemap Urls Found is <b>${result["overview"]["count"]}</b> with unique <b>${result["overview"]["unique"]}</b></h5>`;
+    ).innerHTML = `<h5 class="h5 text-secondary">Total Sitemap Urls Found is <b>${result["overview"]["count"]}</b> with unique <b>${result["overview"]["unique"]}</b></h5>`;
 
     let sitemapHtml = `<h6>Urls Missing in Sitemap but found in Crawl <b>${result["missing"]["sitemap"]["count"]}</b></h6>`;
 
@@ -306,7 +308,7 @@ export function analysisRobotsTxt(data) {
     console.log(data);
     const robots = data.result.robots;
 
-    let robotsElem = `<h5 class="h5 text-primary">Total Test performed in Robots Txt <b>${robots["totalTested"]}</b> where blocked pages were found to be <b>${robots["count"]}</b></h5>`;
+    let robotsElem = `<h5 class="h5 text-warning">Total Test performed in Robots Txt <b>${robots["totalTested"]}</b> where blocked pages were found to be <b>${robots["count"]}</b></h5>`;
 
     if (robots["blocked"].length > 1) {
       robots["blocked"].forEach((value) => {
