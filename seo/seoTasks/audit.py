@@ -173,9 +173,9 @@ def bodyTextAnalysis(group_id, body_text):
     keywords = pages["keywords"].sum()
     keywords = dict(Counter(keywords).most_common())
 
-    pages["common_words"] = pages["body_text"].apply(extract_stopwords)
-    common_words = pages["common_words"].sum()
-    common_words = dict(Counter(common_words).most_common())
+    # pages["common_words"] = pages["body_text"].apply(extract_stopwords)
+    # common_words = pages["common_words"].sum()
+    # common_words = dict(Counter(common_words).most_common())
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -193,7 +193,7 @@ def bodyTextAnalysis(group_id, body_text):
                 "wordCount": pages["word_count"].to_list(),
                 "readability": pages["readability"].to_list(),
                 "keywords": keywords,
-                "commonWords": common_words,
+                # "commonWords": common_words,
             }
         },
     }

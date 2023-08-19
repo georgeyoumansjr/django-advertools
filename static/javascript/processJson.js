@@ -240,20 +240,20 @@ export function analysisBodyText(data) {
     }
     element.innerHTML = html;
 
-    const commonWords = body["commonWords"];
-    // console.log(commonWords);
-    const cfirstTwe = Object.fromEntries(
-      Object.entries(commonWords).slice(0, 20)
-    );
-    const cElem = document.getElementById("common-view");
-    html = '<h3 class="text-secondary fw-bold">Common Words</h3>';
-    for (var value in cfirstTwe) {
-      // console.log(value);
-      html += `<li class="list-group-item">${value} : ${
-        commonWords[value]
-      } <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${value.trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
-    }
-    cElem.innerHTML = html;
+    // const commonWords = body["commonWords"];
+    // // console.log(commonWords);
+    // const cfirstTwe = Object.fromEntries(
+    //   Object.entries(commonWords).slice(0, 20)
+    // );
+    // const cElem = document.getElementById("common-view");
+    // html = '<h3 class="text-secondary fw-bold">Common Words</h3>';
+    // for (var value in cfirstTwe) {
+    //   // console.log(value);
+    //   html += `<li class="list-group-item">${value} : ${
+    //     commonWords[value]
+    //   } <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${value.trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
+    // }
+    // cElem.innerHTML = html;
     // console.log(body["wordCount"]);
     // console.log(body["readability"]);
     createLineChart("lineChart",
