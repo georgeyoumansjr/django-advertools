@@ -215,12 +215,24 @@ def audit(group_id, url):
             os.remove("output/seo_crawler.jl")
     except PermissionError:
         return False
-    crawlDf = crawl(
-        url,
-        output_file="output/seo_crawler.jl",
-        follow_links=True,
-        custom_settings=custom_settings,
-    )
+    
+    try:
+        print("Crawling")
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "task_started", "result": "Crawling started"}
+        )
+        crawlDf = crawl(
+            url,
+            output_file="output/seo_crawler.jl",
+            follow_links=True,
+            custom_settings=custom_settings,
+        )
+    except Exception as e:
+        
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "crawl_failed", "result": str(e)}
+        )
+        return e
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
@@ -229,15 +241,13 @@ def audit(group_id, url):
     pages = pd.read_json("output/seo_crawler.jl", lines=True)
 
     url_list = pages["url"]
-    # print(url_list)
-    # print(url_list.to_list())
+    
 
     url_df = url_to_df(url_list)
     # print(url_df)
 
     robots_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
-    print(robots_url)
-    # robotsTxtAn.delay(group_id,robots_url,url_list)
+    
 
     url_dict = url_list.to_dict()
     # url_dict = {"url": url_dict}

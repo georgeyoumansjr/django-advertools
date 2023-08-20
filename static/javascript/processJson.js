@@ -106,6 +106,8 @@ export function analysisAudit(data) {
     const elemBrokenLinks = document.getElementById("broken-links");
     const keys = Object.keys(overview);
 
+    
+
     var html = ``;
     keys.forEach((key) => {
       // console.log(key);
@@ -213,7 +215,8 @@ export function analysisAudit(data) {
         <h4 class="h4 text-primary">Canonical Links was missing in ${head["canonical"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
         <p class="p">Canonical Links were different in <b>${head["canonical"]["different"]["count"]}</b> and similar in <b>${head["canonical"]["similar"]["count"]}</b></p>
         `;
-  
+
+    document.querySelector('.btn[type="submit"]').disabled = false;
     }
 }
 
