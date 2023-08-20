@@ -214,7 +214,11 @@ if (random_id) {
 
     if (message.type === "task_completed") {
       createToast("","Task Complete",message.result)
-      
+    }
+
+    if (message.type === "task_started") {
+      console.log("Crawling Started")
+      createToast("","Task started",message.result);
     }
 
     if (message.type === "data_converted") {
@@ -236,10 +240,11 @@ if (random_id) {
       createToast("error","Task Failed",message.result);
     }
     
-    if (message.type === "task_started") {
-      console.log("Crawling Started")
-      createToast("","Task started",message.result);
+    if (message.type === "analysisFailed" && message.task_name==="bodyTextAnalysis") {
+      createToast("error","bodyTextAnalysis Failed",message.result);
     }
+
+    
     // Handle the received message as needed
   };
 

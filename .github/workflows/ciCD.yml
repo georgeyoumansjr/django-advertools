@@ -31,3 +31,10 @@ jobs:
           sudo systemctl restart daphne
           sudo systemctl restart gunicorn
           sudo supervisorctl restart celery
+    
+    - name: Activate virtual environment
+      run: |
+        source ~/django-advertools/venv/bin/activate
+
+    - name: Run collectstatic
+      run: python manage.py collectstatic --no-input
