@@ -252,6 +252,8 @@ def audit(group_id, url):
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
+
+
     logger.info("Socket Id" + group_id + " SEO crawl one complete for task " + task_id)
     pages = pd.read_json("output/seo_crawler.jl", lines=True)
 
@@ -278,59 +280,68 @@ def audit(group_id, url):
     # body_text = {"body_text": body_text}
     bodyTextAnalysis.delay(group_id, body_text)
 
-    # Get character counts of SEO desc , title
-    pages["title"] = pages["title"].fillna(" ")
-    pages["title_length"] = pages["title"].apply(len)
-
-    missing_title = pages[(pages["title"].isna())]["url"].to_list()
-    title_length = pages["title_length"].describe().to_dict()
-
     latency = pages["download_latency"].describe().to_dict()
+    # print(latency)
     content_size = pages["size"].describe().to_dict()
-
-    pages["meta_desc"] = pages["meta_desc"].fillna(" ")
-    pages["desc_length"] = pages["meta_desc"].apply(len)
-
-    missing_meta_desc = pages[(pages["meta_desc"].isna())]["url"].to_list()
-    desc_length = pages["desc_length"].describe().to_dict()
-
-    # check if canonical is equal to canonical link
-    pages["canonical"] = pages["canonical"].fillna(" ")
-    missing_canonical = pages[(pages["canonical"].isna())]["url"].to_list()
-    pages["canonical_link"] = pages["url"] == pages["canonical"]
-    condition1 = pages["canonical_link"] == False
-    condition2 = pages["canonical"] != " "
-
-    filtered_canonical = pages[condition1 & condition2]
-    filtered_canonical = filtered_canonical[["url", "canonical"]]
-
-    filtered_canonical_sim = pages[pages["canonical_link"] == True]
-    filtered_canonical_sim = filtered_canonical_sim[["url", "canonical"]]
-
     broken_links = pages[(pages["status"] >= 400)]["url"].to_list()
+    # print(content_size)
 
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id,
-        {"type": "analysisComplete", "task_id": task_id, "task_name": "audit"},
-    )
+    try:
+        # Get character counts of SEO desc , title
+        pages["title"] = pages["title"].fillna(" ")
+        pages["title_length"] = pages["title"].apply(len)
 
-    return {
-        "status": "success",
-        "result": {
-            "audit": {
-                "head": {
-                    "meta_desc": {
+        missing_title = pages[(pages["title"].isna())]["url"].to_list()
+        title_length = pages["title_length"].describe().to_dict()
+
+        title_json = {
+                        "length_overview": title_length,
+                        "missing": {"urls": missing_title, "count": len(missing_title)},
+                    }
+    except Exception as e:
+        title_json = {
+            "Error": str(e)
+        }
+
+    
+
+    try:
+        pages["meta_desc"] = pages["meta_desc"].fillna(" ")
+        pages["desc_length"] = pages["meta_desc"].apply(len)
+
+        missing_meta_desc = pages[(pages["meta_desc"].isna())]["url"].to_list()
+        desc_length = pages["desc_length"].describe().to_dict()
+
+        meta_json = {
                         "length_overview": desc_length,
                         "missing": {
                             "urls": missing_meta_desc,
                             "count": len(missing_meta_desc),
                         },
-                    },
-                    "title": {
-                        "length_overview": title_length,
-                        "missing": {"urls": missing_title, "count": len(missing_title)},
-                    },
-                    "canonical": {
+                    }
+    except Exception as e:
+        meta_json = {
+            "Error": str(e)
+        }
+
+    
+    try:
+        # check if canonical is equal to canonical link
+        pages["canonical"] = pages["canonical"].fillna(" ")
+        missing_canonical = pages[(pages["canonical"].isna())]["url"].to_list()
+        pages["canonical_link"] = pages["url"] == pages["canonical"]
+        condition1 = pages["canonical_link"] == False
+        condition2 = pages["canonical"] != " "
+
+        filtered_canonical = pages[condition1 & condition2]
+        filtered_canonical = filtered_canonical[["url", "canonical"]]
+
+        filtered_canonical_sim = pages[pages["canonical_link"] == True]
+        filtered_canonical_sim = filtered_canonical_sim[["url", "canonical"]]
+
+        
+
+        canonicalData = {
                         "missing": {
                             "urls": missing_canonical,
                             "count": len(missing_canonical),
@@ -347,7 +358,28 @@ def audit(group_id, url):
                             ).to_dict(),
                             "count": len(filtered_canonical),
                         },
-                    },
+                    }
+    except Exception as e:
+        canonicalData = {
+            "error": str(e)
+        }
+
+
+    
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": "audit"},
+    )
+
+    return {
+        "status": "success",
+        "result": {
+            "audit": {
+                "head": {
+                    "meta_desc": meta_json,
+                    "title": title_json,
+                    "canonical": canonicalData
                 },
                 "links": {
                     "broken_links": broken_links,

@@ -99,14 +99,14 @@ export function analysisAudit(data) {
     const brokenlinks = data.result.audit.links["broken_links"];
     const head = data.result.audit.head;
 
-    // console.log(JSON.stringify(data));
+    console.log(JSON.stringify(data));
 
     // console.log(brokenlinks);
     const elemOverview = document.querySelector("#overview .row");
     const elemBrokenLinks = document.getElementById("broken-links");
     const keys = Object.keys(overview);
 
-    
+    console.log(keys);
 
     var html = ``;
     keys.forEach((key) => {
@@ -126,19 +126,13 @@ export function analysisAudit(data) {
                 <div class="container m-2">
                   <h5 class="h5 card-title fw-bold">${key} Overview</h5>
                   <div class="card-body">
-                    <b>Average ${key} of ${type}:</b> ${overview[
-        key
-      ].mean.toFixed(3)} ${unit}.
+                    <b>Average ${key} of ${type}:</b> ${overview[key].mean.toFixed(3)} ${unit}.
                   </div>
                   <div class="card-body">
-                    <b>Max ${key} of ${type}:</b> ${overview[key].max.toFixed(
-        3
-      )} ${unit}.
+                    <b>Max ${key} of ${type}:</b> ${overview[key].max.toFixed(3)} ${unit}.
                   </div>
                   <div class="card-body">
-                    <b>Minimum ${key} of ${type}:</b>  ${overview[
-        key
-      ].min.toFixed(3)} ${unit}.
+                    <b>Minimum ${key} of ${type}:</b>  ${overview[key].min.toFixed(3)} ${unit}.
                   </div>
                 </div>
               </div>
@@ -148,7 +142,7 @@ export function analysisAudit(data) {
     elemOverview.innerHTML = html;
 
     let linkHtml = `<h5 class="h5 text-primary">${brokenlinks.length} Broken Links were found</h5>`;
-    if (brokenlinks.length > 1) {
+    if (brokenlinks.length > 0) {
       brokenlinks.forEach((value) => {
         linkHtml += `
               <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
@@ -165,19 +159,13 @@ export function analysisAudit(data) {
           <div class="container m-2">
             <h5 class="h5 card-title fw-bold">Meta Description Length Overview</h5>
             <div class="card-body">
-              <b>Average length of Description:</b> ${head["meta_desc"][
-                "length_overview"
-              ].mean.toFixed(2)} characters.
+              <b>Average length of Description:</b> ${head["meta_desc"]["length_overview"].mean.toFixed(2)} characters.
             </div>
             <div class="card-body">
-              <b>Max length of Description:</b> ${head["meta_desc"][
-                "length_overview"
-              ].max.toFixed(2)} characters.
+              <b>Max length of Description:</b> ${head["meta_desc"]["length_overview"].max.toFixed(2)} characters.
             </div>
             <div class="card-body">
-              <b>Minimum length of Description:</b>  ${head["meta_desc"][
-                "length_overview"
-              ].min.toFixed(2)} characters.
+              <b>Minimum length of Description:</b>  ${head["meta_desc"]["length_overview"].min.toFixed(2)} characters.
             </div>
           </div>
         </div>
@@ -186,26 +174,18 @@ export function analysisAudit(data) {
     document.getElementById("meta-overview").innerHTML = missingMeta;
 
     document.getElementById("titleAnalysis").innerHTML = `
-          <h5 class="h5 text-success">Title was missing in ${
-            head["title"]["missing"]["count"]
-          } out of ${head["title"]["length_overview"]["count"]}</h5>
+          <h5 class="h5 text-success">Title was missing in ${head["title"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h5>
           <div class="card bg-success text-white">
             <div class="container m-2">
               <h5 class="h5 card-title fw-bold">Title Length Overview</h5>
               <div class="card-body">
-                <b>Average length of Title:</b> ${head["title"][
-                  "length_overview"
-                ].mean.toFixed(2)} characters.
+                <b>Average length of Title:</b> ${head["title"]["length_overview"].mean.toFixed(2)} characters.
               </div>
               <div class="card-body">
-                <b>Max length of Title:</b> ${head["title"][
-                  "length_overview"
-                ].max.toFixed(2)} characters.
+                <b>Max length of Title:</b> ${head["title"]["length_overview"].max.toFixed(2)} characters.
               </div>
               <div class="card-body">
-                <b>Minimum length of Title:</b>  ${head["title"][
-                  "length_overview"
-                ].min.toFixed(2)} characters.
+                <b>Minimum length of Title:</b>  ${head["title"]["length_overview"].min.toFixed(2)} characters.
               </div>
             </div>
           </div>
