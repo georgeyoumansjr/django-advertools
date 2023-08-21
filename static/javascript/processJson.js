@@ -261,7 +261,7 @@ export function analysisSiteMap(data) {
 
     let sitemapHtml = `<h6>Urls Missing in Sitemap but found in Crawl <b>${result["missing"]["sitemap"]["count"]}</b></h6>`;
 
-    if (result["missing"]["sitemap"]["urls"].length > 1) {
+    if (result["missing"]["sitemap"]["urls"].length > 0) {
       result["missing"]["sitemap"]["urls"].forEach((value) => {
         sitemapHtml += `
               <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
@@ -273,7 +273,7 @@ export function analysisSiteMap(data) {
 
     let crawlHtml = `<h6>Urls Missing in Crawled but found in Sitemap <b>${result["missing"]["crawl"]["count"]}</b></h6>`;
 
-    if (result["missing"]["crawl"]["urls"].length > 1) {
+    if (result["missing"]["crawl"]["urls"].length > 0) {
       result["missing"]["crawl"]["urls"].forEach((value) => {
         crawlHtml += `
               <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
@@ -293,7 +293,7 @@ export function analysisRobotsTxt(data) {
 
     let robotsElem = `<h5 class="h5 text-warning">Total Test performed in Robots Txt <b>${robots["totalTested"]}</b> where blocked pages were found to be <b>${robots["count"]}</b></h5>`;
 
-    if (robots["blocked"].length > 1) {
+    if (robots["blocked"].length > 0) {
       robots["blocked"].forEach((value) => {
         robotsElem += `
               <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
