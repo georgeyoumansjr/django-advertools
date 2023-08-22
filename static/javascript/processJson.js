@@ -152,7 +152,7 @@ export function analysisAudit(data) {
 
     elemBrokenLinks.innerHTML = linkHtml;
 
-    let missingMeta = `<h5 class="h5 text-primary">Missing Meta Description in total ${head["meta_desc"]["missing"]["count"]}<h5>`;
+    let missingMeta = `<h5 class="h5 text-primary">Missing Meta Description in ${head["meta_desc"]["missing"]["count"]}<h5> out of ${head["meta_desc"]["length_overview"]["count"]}`;
 
     missingMeta += `
         <div class="card bg-primary text-white">
