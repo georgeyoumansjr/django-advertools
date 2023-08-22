@@ -1,4 +1,5 @@
 from celery import shared_task
+from celery.exceptions import Retry
 import logging
 import os
 from ydata_profiling import ProfileReport
@@ -152,10 +153,12 @@ def urlAnalysis(group_id, url_dict):
     task_id = urlAnalysis.request.id
 
 
+# @shared_task(bind=True, retry_kwargs={'max_retries': 3, 'countdown': 6})
 @shared_task
 def bodyTextAnalysis(group_id, body_text):
     task_id = bodyTextAnalysis.request.id
 
+    # try:
     try:
         pages = pd.DataFrame({"body_text": body_text})
         # print(pages)
@@ -179,18 +182,15 @@ def bodyTextAnalysis(group_id, body_text):
         print(e)
 
         async_to_sync(channel_layer.group_send)(
-        "group_" + group_id,
-        {
-            "type": "analysisFailed",
-            "task_id": task_id,
-            "task_name": "bodyTextAnalysis",
-            "result": str(e)
-        },
-    )
+            "group_" + group_id,
+            {
+                "type": "analysisFailed",
+                "task_id": task_id,
+                "task_name": "bodyTextAnalysis",
+                "result": str(e)
+            }
+        )
 
-    # pages["common_words"] = pages["body_text"].apply(extract_stopwords)
-    # common_words = pages["common_words"].sum()
-    # common_words = dict(Counter(common_words).most_common())
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -212,6 +212,9 @@ def bodyTextAnalysis(group_id, body_text):
             }
         },
     }
+    
+    # except MemoryError as e:
+    #     raise Retry(exc=e)
 
 
 @shared_task
@@ -274,11 +277,20 @@ def audit(group_id, url):
     sitemapAnalysis.delay(group_id, robots_url, url_dict)
 
     ## Creation of Columns based based on functionalities
+    
+    if len(url_list) > 900:
 
-    body_text = pages["body_text"]
-    body_text = body_text.to_dict()
-    # body_text = {"body_text": body_text}
-    bodyTextAnalysis.delay(group_id, body_text)
+         async_to_sync(channel_layer.group_send)(
+            "group_" + group_id,
+            {"type": "analysisFailed", "task_id": task_id, "task_name": "audit","result":"Too many urls to process fo body"},
+        )
+
+    else:
+
+        body_text = pages["body_text"]
+        body_text = body_text.to_dict()
+        # body_text = {"body_text": body_text}
+        bodyTextAnalysis.delay(group_id, body_text)
 
     latency = pages["download_latency"].describe().to_dict()
     # print(latency)
