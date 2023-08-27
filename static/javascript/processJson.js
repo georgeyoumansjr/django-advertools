@@ -95,18 +95,19 @@ export function analysisMetaDescription(data) {
 // Audit Analysis from Site Audit
 export function analysisAudit(data) {
   if (data.status === "success") {
+    console.log("processing analysis audit")
     const overview = data.result.audit.overview;
     const brokenlinks = data.result.audit.links["broken_links"];
     const head = data.result.audit.head;
 
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
 
     // console.log(brokenlinks);
     const elemOverview = document.querySelector("#overview .row");
     const elemBrokenLinks = document.getElementById("broken-links");
     const keys = Object.keys(overview);
 
-    console.log(keys);
+    // console.log(keys);
 
     var html = ``;
     keys.forEach((key) => {
@@ -274,7 +275,7 @@ export function analysisSiteMap(data) {
 
 export function analysisRobotsTxt(data) {
   if (data.status === "success") {
-    console.log(data);
+    // console.log(data);
     const robots = data.result.robots;
 
     let robotsElem = `<h5 class="h5 text-warning">Total Test performed in Robots Txt <b>${robots["totalTested"]}</b> where blocked pages were found to be <b>${robots["count"]}</b></h5>`;

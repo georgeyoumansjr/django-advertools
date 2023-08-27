@@ -235,54 +235,54 @@ def bodyTextAnalysis(group_id, body_text):
 def bodyTextAnalysis(group_id, body_text):
     task_id = bodyTextAnalysis.request.id
     print(type(body_text))
-    # try:
-    chunk_size = 100  # Adjust the chunk size based on your needs
-    num_chunks = len(body_text) // chunk_size + 1
-    chunks = [
-        body_text[i * chunk_size : (i + 1) * chunk_size]
-        for i in range(num_chunks)
-    ]
+    try:
+        chunk_size = 100  # Adjust the chunk size based on your needs
+        num_chunks = len(body_text) // chunk_size + 1
+        chunks = [
+            body_text[i * chunk_size : (i + 1) * chunk_size]
+            for i in range(num_chunks)
+        ]
 
-    all_keywords = []
-    all_word_count = []
-    all_readability = []
+        all_keywords = []
+        all_word_count = []
+        all_readability = []
 
-    for chunk in chunks:
-        chunk_pages = pd.DataFrame({"body_text": chunk})
-        chunk_pages["body_text"].fillna(" ",inplace=True)
+        for chunk in chunks:
+            chunk_pages = pd.DataFrame({"body_text": chunk})
+            chunk_pages["body_text"].fillna(" ",inplace=True)
 
-        chunk_pages["word_count"] = chunk_pages["body_text"].apply(get_word_count)
-        chunk_pages["readability"] = chunk_pages["body_text"].apply(text_readability)
-        chunk_pages["keywords"] = chunk_pages["body_text"].apply(extract_keywords)
+            chunk_pages["word_count"] = chunk_pages["body_text"].apply(get_word_count)
+            chunk_pages["readability"] = chunk_pages["body_text"].apply(text_readability)
+            chunk_pages["keywords"] = chunk_pages["body_text"].apply(extract_keywords)
 
-        # chunk_pages.to_json("name" + str(index) + ".json")
-        chunk_keywords = chunk_pages["keywords"].sum()
-        
-        all_keywords.extend(chunk_keywords)
-        all_word_count.extend(chunk_pages["word_count"])
-        all_readability.extend(chunk_pages["readability"])
+            # chunk_pages.to_json("name" + str(index) + ".json")
+            chunk_keywords = chunk_pages["keywords"].sum()
+            
+            all_keywords.extend(chunk_keywords)
+            all_word_count.extend(chunk_pages["word_count"])
+            all_readability.extend(chunk_pages["readability"])
 
-    keywords = dict(Counter(all_keywords).most_common())
-    # print(keywords)
-    # print(all_readability)
-    # print(all_word_count)
+        keywords = dict(Counter(all_keywords).most_common())
+        # print(keywords)
+        # print(all_readability)
+        # print(all_word_count)
 
-    # except Exception as e:
-    #     print(e)
+    except Exception as e:
+        print(e)
 
-    #     async_to_sync(channel_layer.group_send)(
-    #         "group_" + group_id,
-    #         {
-    #             "type": "analysisFailed",
-    #             "task_id": task_id,
-    #             "task_name": "bodyTextAnalysis",
-    #             "result": str(e),
-    #         },
-    #     )
-    #     return {
-    #         "status": "error",
-    #         "result": "Analysis failed",
-    #     }
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id,
+            {
+                "type": "analysisFailed",
+                "task_id": task_id,
+                "task_name": "bodyTextAnalysis",
+                "result": str(e),
+            },
+        )
+        return {
+            "status": "error",
+            "result": "Analysis failed",
+        }
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -323,7 +323,7 @@ def audit(group_id, url):
         return False
 
     try:
-        print("Crawling")
+        # print("Crawling")
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "task_started", "result": "Crawling started"}
         )
