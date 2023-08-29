@@ -10,6 +10,7 @@ import {
   analysisBodyText,
   analysisSiteMap,
   analysisRobotsTxt,
+  analysisInternalLinks,
 } from "./processJson.js";
 
 function fetchDataAndProcess(url, successCallback, errorCallback) {
@@ -74,6 +75,19 @@ if (random_id) {
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
       fetchDataAndProcess(url, analysisContent, (error) =>
+        console.error("Error:", error)
+      );
+    }
+
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "internalLinksAnalysis"
+    ) {
+      console.log("InternalLinks Analysis complete");
+
+      var url = "/api/analysis/" + message.task_id + "/";
+      // console.log(url);
+      fetchDataAndProcess(url, analysisInternalLinks, (error) =>
         console.error("Error:", error)
       );
     }

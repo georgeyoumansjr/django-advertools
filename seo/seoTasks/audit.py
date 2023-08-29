@@ -12,19 +12,9 @@ import pandas as pd
 import re
 import tracemalloc
 from advertools import (
-    crawl_headers,
     crawl,
-    crawllogs_to_df,
-    robotstxt_to_df,
     robotstxt_test,
-    extract_intense_words,
-    extract_hashtags,
-    extract_mentions,
-    extract_numbers,
     sitemap_to_df,
-    extract_questions,
-    extract_urls,
-    stopwords,
     url_to_df,
 )
 from asgiref.sync import async_to_sync
@@ -35,7 +25,10 @@ from seo.utils import (
     extract_keywords,
     text_readability,
     get_word_count,
+
     syllable_count,
+    internal_links,
+    flatten
 )
 
 channel_layer = get_channel_layer()
@@ -44,12 +37,12 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def robotsAnalysis(group_id, robots_url, url_dict):
+def robotsAnalysis(group_id, robots_url, url_list):
     task_id = robotsAnalysis.request.id
     tracemalloc.start()
     logger.info("Robots Analysis started with memory "+ str())
     print(task_id)
-    pages = pd.DataFrame({"url": url_dict})
+    pages = pd.DataFrame({"url": url_list})
     try:
         # robots_df = robotstxt_to_df(robots_url)
         test_df = robotstxt_test(
@@ -97,10 +90,9 @@ def robotsAnalysis(group_id, robots_url, url_dict):
 
 
 @shared_task
-
-def sitemapAnalysis(group_id, robots_url, url_dict):
+def sitemapAnalysis(group_id, robots_url, url_list):
     task_id = sitemapAnalysis.request.id
-    pages = pd.DataFrame({"url": url_dict})
+    pages = pd.DataFrame({"url": url_list})
     logger.info("Sitemap Analysis started ")
     print(task_id)
     try:
@@ -159,6 +151,37 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
 def urlAnalysis(group_id, url_dict):
     task_id = urlAnalysis.request.id
 
+
+@shared_task
+def internalLinksAnalysis(group_id,url_links):
+    print("Entered internal link analysis")
+    task_id = internalLinksAnalysis.request.id
+
+    converted_urls = list(map(internal_links,url_links))
+
+    countPerUrl = list(map(len,converted_urls))
+    flatten_urls = list(flatten(converted_urls))
+    count_urls = dict(Counter(flatten_urls).most_common(10))
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {
+            "type": "analysisComplete",
+            "task_id": task_id,
+            "task_name": "internalLinksAnalysis",
+        },
+    )
+
+    return {
+        "status": "success",
+        "result": {
+            "top10": count_urls,
+            "overview": {
+                "count": len(url_links),
+                "countPerUrl": countPerUrl
+            }
+        }
+    }
 
 """
 # @shared_task(bind=True, retry_kwargs={'max_retries': 3, 'countdown': 6})
@@ -268,7 +291,7 @@ def bodyTextAnalysis(group_id, body_text):
         # print(all_word_count)
 
     except Exception as e:
-        print(e)
+        # print(e)
 
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
@@ -353,33 +376,36 @@ def audit(group_id, url):
         "title",
         "meta_desc",
         "canonical",
+        "links_url"
     ]
     pages = pd.read_json(
         "output/seo_crawler.jl",
         dtype={
             "status":"int32",
-            # "url": pd.SparseDtype("string", fill_value=""),
-            # "body_text": pd.SparseDtype("string", fill_value=""),
-            # "title": pd.SparseDtype("string", fill_value=""),
-            # "meta_desc": pd.SparseDtype("string", fill_value=""),
-            # "canonical": pd.SparseDtype("string", fill_value="")
         },
         lines=True,
     )[columns_to_select]
 
     url_list = pages["url"]
 
-    url_df = url_to_df(url_list)
+    url_df = url_to_df(url_list[0])
     # print(url_df)
 
     robots_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
 
-    url_dict = url_list.to_dict()
-    # url_dict = {"url": url_dict}
-    robotsAnalysis.delay(group_id, robots_url, url_dict)
+    url_list = url_list.to_list()
+    
+    robotsAnalysis.delay(group_id, robots_url, url_list)
 
-    # sitemapAna.delay(group_id,sitemap_url,url_dict)
-    sitemapAnalysis.delay(group_id, robots_url, url_dict)
+    # sitemapAna.delay(group_id,sitemap_url,url_list)
+    sitemapAnalysis.delay(group_id, robots_url, url_list)
+
+    pages["links_url"].fillna(" ",inplace=True)
+    internal_links = pages["links_url"].to_list()
+
+    #internal_links analysis
+    internalLinksAnalysis.delay(group_id,internal_links)
+
 
     ## Creation of Columns based based on functionalities
 

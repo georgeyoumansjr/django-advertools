@@ -46,6 +46,20 @@ def get_word_count(text):
     return len(words)
 
 
+def internal_links(links_url):
+    links = links_url.split("@@")
+    return links
+
+
+def flatten(lst):
+    for sublist in lst:
+        if isinstance(sublist, list):
+            yield from flatten(sublist)
+        else:
+            yield sublist
+
+            
+
 def extract_keywords(body_text):
     pattern = r"[^a-zA-Z0-9@\s]"
     body_text = re.sub(pattern, "", body_text)
@@ -110,6 +124,9 @@ def syllable_count(word):
         syllables = 1
 
     return syllables
+
+
+
 
 
 """
