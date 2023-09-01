@@ -51,7 +51,7 @@ if (random_id) {
     if (message.task_id) {
       console.log("Task id: " + message.task_id);
     }
-    // console.log("Received message:", message);
+    
 
     if (
       message.type === "analysisComplete" &&
@@ -73,7 +73,7 @@ if (random_id) {
       console.log("Analysis complete");
 
       var url = "/api/analysis/" + message.task_id + "/";
-      // console.log(url);
+      
       fetchDataAndProcess(url, analysisContent, (error) =>
         console.error("Error:", error)
       );
@@ -87,9 +87,11 @@ if (random_id) {
 
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
-      fetchDataAndProcess(url, analysisInternalLinks, (error) =>
-        console.error("Error:", error)
-      );
+      setTimeout(() => {
+        fetchDataAndProcess(url, analysisInternalLinks, (error) =>
+          console.error("Error:", error)
+        );
+      }, 3000);
     }
 
     if (
