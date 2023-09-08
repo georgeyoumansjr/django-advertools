@@ -26,6 +26,7 @@ def validate_links(links):
         return True
 
 
+
 def extract_stopwords(text):
     stop_words = set(stopwords["english"])
     words = text.split()
