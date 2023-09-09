@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 def keyword_analysis(group_id, keywords):
     task_id = keyword_analysis.request.id
-    
+
 
 
 
@@ -107,6 +107,9 @@ def industry_research(group_id, url:list):
     pages["body_text"] = pages["body_text"].fillna(" ",inplace=True)
 
     pages["keywords"] = pages["keywords"].apply(extract_keywords)
+
+    
+
 
 
 
