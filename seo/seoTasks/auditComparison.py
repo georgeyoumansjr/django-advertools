@@ -94,33 +94,32 @@ def robotsAnalysis(group_id, robots_url, url_list):
 @shared_task
 def sitemapAnalysis(group_id, robots_url, url_list):
     task_id = sitemapAnalysis.request.id
-    pages = pd.DataFrame({"url": url_list})
     logger.info("Sitemap Analysis started ")
     print(task_id)
-    try:
-        sitemap_df = sitemap_to_df(robots_url)
-        missing_in_sitemap = set(pages["url"]) - set(sitemap_df["loc"])
-        missing_in_crawl = set(sitemap_df["loc"]) - set(pages["url"])
+    
+    for robot_url in robots_url:
 
-    except ValueError:
         try:
-            sitemap_df = sitemap_df(robots_url.replace("robots.txt", "sitemap.xml"))
-            missing_in_sitemap = set(pages["url"]) - set(sitemap_df["loc"])
-            missing_in_crawl = set(sitemap_df["loc"]) - set(pages["url"])
-        except Exception as e:
-            print(e)
-            async_to_sync(channel_layer.group_send)(
-                "group_" + group_id,
-                {
-                    "type": "analysisFailed",
-                    "result": "Sitemap analysis failed",
-                    "task_id": task_id,
-                    "task_name": "sitemapAnalysis",
-                },
-            )
-            return {"status": "failed", "result": {"message": e}}
+            sitemap_df = sitemap_to_df(robot_url)
+            
+        except ValueError:
+            try:
+                sitemap_df = sitemap_df(robots_url.replace("robots.txt", "sitemap.xml"))
+                
+            except Exception as e:
+                print(e)
+                async_to_sync(channel_layer.group_send)(
+                    "group_" + group_id,
+                    {
+                        "type": "analysisFailed",
+                        "result": "Sitemap analysis failed",
+                        "task_id": task_id,
+                        "task_name": "sitemapAnalysis",
+                    },
+                )
+                return {"status": "failed", "result": {"message": e}}
 
-    overview = sitemap_df["loc"].describe().to_dict()
+        overview = sitemap_df["loc"].describe().to_dict()
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -134,16 +133,6 @@ def sitemapAnalysis(group_id, robots_url, url_list):
     return {
         "status": "success",
         "result": {
-            "missing": {
-                "sitemap": {
-                    "urls": list(missing_in_sitemap),
-                    "count": len(missing_in_sitemap),
-                },
-                "crawl": {
-                    "urls": list(missing_in_crawl),
-                    "count": len(missing_in_crawl),
-                },
-            },
             "overview": overview,
         },
     }
@@ -156,14 +145,21 @@ def urlAnalysis(group_id, url_dict):
 
 @shared_task
 def internalLinksAnalysis(group_id,url_links):
-    print("Entered internal link analysis")
+    # print("Entered internal link analysis")
     task_id = internalLinksAnalysis.request.id
 
-    converted_urls = list(map(internal_links,url_links))
+    links_df = pd.read_json(url_links)
+    grouped_df = links_df.groupby("url")
 
-    countPerUrl = list(map(len,converted_urls))
-    flatten_urls = list(flatten(converted_urls))
-    count_urls = dict(Counter(flatten_urls).most_common(10))
+    response = {}
+    for url, link_df in grouped_df:
+
+        converted_urls = list(map(internal_links,link_df["links_url"].iloc[0]))
+        count_urls = dict(Counter(converted_urls).most_common(10))
+        response[url] = {
+            "top10": count_urls,
+            "count": len(converted_urls),
+        }
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -171,38 +167,42 @@ def internalLinksAnalysis(group_id,url_links):
             "type": "analysisComplete",
             "task_id": task_id,
             "task_name": "internalLinksAnalysis",
-        },
+        }
     )
 
     return {
         "status": "success",
-        "result": {
-            "top10": count_urls,
-            "overview": {
-                "count": len(url_links),
-                "countPerUrl": countPerUrl
-            }
-        }
+        "result": response
     }
 
 
 @shared_task
 def bodyTextAnalysis(group_id, body_text):
     task_id = bodyTextAnalysis.request.id
-    print(type(body_text))
+    # print(type(body_text))
     try:
         body_text = pd.read_json(body_text)
+        grouped_df = body_text.groupby("url")
+        response = {}
 
-        body_text["body_text"].fillna(" ",inplace=True)
+        for url, body_df in grouped_df:
+            
+            body_df["body_text"].fillna(" ",inplace=True)
 
-        body_text["word_count"] = body_text["body_text"].apply(get_word_count)
-        body_text["readability"] = body_text["body_text"].apply(text_readability)
-        body_text["keywords"] = body_text["body_text"].apply(extract_keywords)
-        body_text["commonKeywords"] = body_text["keywords"].apply(lambda x: dict(Counter.most_common(x)))
-        # dict(Counter(all_keywords).most_common())
+            body_df["word_count"] = body_df["body_text"].apply(get_word_count)
+            body_df["readability"] = body_df["body_text"].apply(text_readability)
+            body_df["keywords"] = body_df["body_text"].apply(extract_keywords)
+            all_keywords = body_df["keywords"].sum()
+            most_common = dict(Counter(all_keywords).most_common(10))
 
+            response[url]= {
+                "readability": body_df["readability"].iloc[0],
+                "word_count": body_df["word_count"].iloc[0],
+                "most_common": most_common
+            }
+        
 
-        response = body_text[["word_count","readability","keywords","commonKeywords"]]
+        # response = body_text[["word_count","readability","keywords","commonKeywords"]]
 
     except Exception as e:
         # print(e)
@@ -306,7 +306,6 @@ def audit(group_id, url):
         crawlDf = crawl(
             url,
             output_file="output/seo_crawler.jl",
-            follow_links=True,
             custom_settings=custom_settings,
         )
     except Exception as e:
@@ -345,7 +344,7 @@ def audit(group_id, url):
     logsDataAnalysis.delay(group_id)
 
     pages["links_url"].fillna(" ",inplace=True)
-    internal_links = pages["links_url"].to_list()
+    internal_links = pages[["url","links_url"]].to_json()
 
     #internal_links analysis
     internalLinksAnalysis.delay(group_id,internal_links)

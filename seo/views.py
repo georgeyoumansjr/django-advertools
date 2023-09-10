@@ -171,6 +171,7 @@ def sitemapToDf(request):
 
             overview = df["loc"].describe()
 
+            df["loc"].fillna(" ",inplace=True)
             check_http = df[["loc"]].copy()
 
             check_http["https"] = list(
