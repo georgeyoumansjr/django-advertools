@@ -12,4 +12,7 @@ urlpatterns = [
     path(
         "file/<int:pid>/", views.getCsvColumns, name="csv-columns"
     ),
+    path(
+        "audit/", views.makeAuditRequest, name="api-audit"
+    ),
 ]

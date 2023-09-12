@@ -110,7 +110,7 @@ def robotsToDf(request, filters=None):
             logger.info("Socket Is is " + group_id)
             dynamic_title = "Robots.txt Data profile"
             task_id = generateReport.delay(group_id, df.to_json(), False, dynamic_title)
-            # print("Task id in robots.txt "+ task_id.id)
+            
             unique = None
             if "directive" in df:
                 unique_counts = df["directive"].value_counts()

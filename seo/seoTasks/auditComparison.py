@@ -14,7 +14,7 @@ import re
 import tracemalloc
 from advertools import (
     crawl,
-    robotstxt_test,
+    robotstxt_to_df,
     sitemap_to_df,
     crawllogs_to_df,
     url_to_df,
@@ -38,57 +38,62 @@ channel_layer = get_channel_layer()
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def robotsAnalysis(group_id, robots_url, url_list):
-    task_id = robotsAnalysis.request.id
-    tracemalloc.start()
-    logger.info("Robots Analysis started with memory "+ str())
-    print(task_id)
-    pages = pd.DataFrame({"url": url_list})
-    try:
-        # robots_df = robotstxt_to_df(robots_url)
-        test_df = robotstxt_test(
-            robots_url,
-            user_agents=[
-                "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/W.X.Y.Z Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
-            ],
-            urls=pages["url"],
-        )
-        blocked_pages = test_df[test_df["can_fetch"] == False]
-    except Exception as e:
-        async_to_sync(channel_layer.group_send)(
-            "group_" + group_id,
-            {
-                "type": "analysisFailed",
-                "result": "Robots Txt analysis failed",
-                "task_id": task_id,
-                "task_name": "robotsAnalysis",
-            },
-        )
-        return {
-            "status": "failed",
-            "result": {"error": "Unable to find the sitemap url"},
-        }
+# @shared_task
+# def robotsAnalysis(group_id, robots_url, url_list):
+#     task_id = robotsAnalysis.request.id
+#     tracemalloc.start()
+#     logger.info("Robots Analysis started with memory "+ str())
+#     print(task_id)
+#     pages = pd.DataFrame({"url": url_list})
+#     try:
+#         robots_df = robotstxt_to_df(robots_url)
+#         if "directive" in robots_df:
+#             unique_counts = robots_df["directive"].value_counts()
 
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id,
-        {
-            "type": "analysisComplete",
-            "task_id": task_id,
-            "task_name": "RobotsTextAnalysis",
-        },
-    )
+#             new_Df = pd.DataFrame(
+#                 {
+#                     "frequency": unique_counts,
+#                     "percentage": unique_counts / len(robots_df) * 100,
+#                 }
+#             )
+#             new_Df.reset_index(inplace=True)
+#             new_Df.columns = ["directive", "frequency", "percentage"]
 
-    return {
-        "status": "success",
-        "result": {
-            "robots": {
-                "blocked": blocked_pages["url_path"].to_list(),
-                "count": len(blocked_pages),
-                "totalTested": len(test_df),
-            }
-        },
-    }
+#             unique = new_Df.to_dict()
+        
+#     except Exception as e:
+#         async_to_sync(channel_layer.group_send)(
+#             "group_" + group_id,
+#             {
+#                 "type": "analysisFailed",
+#                 "result": "Robots Txt analysis failed",
+#                 "task_id": task_id,
+#                 "task_name": "robotsAnalysis",
+#             },
+#         )
+#         return {
+#             "status": "failed",
+#             "result": {"error": "Unable to find the sitemap url"},
+#         }
+
+#     async_to_sync(channel_layer.group_send)(
+#         "group_" + group_id,
+#         {
+#             "type": "analysisComplete",
+#             "task_id": task_id,
+#             "task_name": "RobotsTextAnalysis",
+#         },
+#     )
+
+#     return {
+#         "status": "success",
+#         "result": {
+#             "robots": {
+#                 "unique": unique,
+#                 "dataTypes": robots_df.dtypes.to_dict()
+#             }
+#         },
+#     }
 
 
 @shared_task
@@ -252,7 +257,7 @@ def logsDataAnalysis(group_id):
     logsDf["url"].fillna(" ",inplace=True)
     robots_df = logsDf.loc[logsDf['url'].str.endswith("robots.txt")]["url"]
 
-    robotsAnalysis.delay(group_id,robots_df)
+    # robotsAnalysis.delay(group_id,robots_df)
 
 
 

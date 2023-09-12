@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from celery.result import AsyncResult
 from analyse.models import DatasetFile
 import pandas as pd
-
+from seo.seoTasks.audit import audit
 
 def getMainTaskResponse(request, task_id):
     task_resp = AsyncResult(id=task_id)
@@ -46,3 +46,14 @@ def getCsvColumns(request, pid):
         return JsonResponse({"result": header})
     except Exception as e:
         return JsonResponse({"result": []})
+    
+
+def makeAuditRequest(request):
+    url = request.GET.get("url")
+    if url:
+        audit.delay("",url)
+    else:
+        return JsonResponse({
+            "status": "failed",
+            "result": "URL query is not enetered"
+        })
